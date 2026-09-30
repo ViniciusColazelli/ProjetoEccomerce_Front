@@ -1,19 +1,12 @@
 // components/home/Hero.jsx
-import { S } from "../../styles/theme";
+import Button from "../ui/Button";
+import Icon from "../ui/Icon";
+import { S, T } from "../../styles/theme";
 
 export default function Hero() {
   return (
     <section style={{ background: S.heroBg, padding: "64px 40px 80px" }}>
-      <p
-        style={{
-          fontSize: 11,
-          letterSpacing: "0.26em",
-          textTransform: "uppercase",
-          color: S.gold,
-          fontWeight: 400,
-          marginBottom: 14,
-        }}
-      >
+      <p style={{ ...T.eyebrow, letterSpacing: "0.26em", marginBottom: 14 }}>
         Coleção 2026
       </p>
       <h1
@@ -32,7 +25,7 @@ export default function Hero() {
       <p
         style={{
           fontSize: 15,
-          color: "#666",
+          color: S.soft,
           fontWeight: 300,
           marginBottom: 32,
           lineHeight: 1.7,
@@ -40,33 +33,10 @@ export default function Hero() {
       >
         Qualidade, identidade e conforto.
       </p>
-      <button
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 10,
-          background: S.dark,
-          color: "#fff",
-          padding: "13px 26px",
-          borderRadius: 8,
-          fontSize: 14,
-          border: "none",
-          cursor: "pointer",
-          fontFamily: S.sans,
-        }}
-      >
+      <Button style={{ padding: "13px 26px" }}>
         Ver coleção
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#fff"
-          strokeWidth="2"
-        >
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
-      </button>
+        <Icon name="arrow" size={14} color={S.white} stroke={2} />
+      </Button>
     </section>
   );
 }

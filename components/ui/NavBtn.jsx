@@ -11,9 +11,9 @@ export default function NavBtn({ onClick, badge, children }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        background: hov ? "#f5f5f5" : "#fff",
-        border: `0.5px solid ${S.border}`,
-        borderRadius: 10,
+        background: hov ? S.hoverBg : S.white,
+        border: S.line,
+        borderRadius: S.radius.md,
         padding: 9,
         display: "flex",
         alignItems: "center",
@@ -32,7 +32,7 @@ export default function NavBtn({ onClick, badge, children }) {
             right: 5,
             width: 7,
             height: 7,
-            background: "#c0392b",
+            background: S.danger,
             borderRadius: "50%",
           }}
         />

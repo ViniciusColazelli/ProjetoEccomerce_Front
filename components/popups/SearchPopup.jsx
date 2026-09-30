@@ -1,48 +1,22 @@
 // components/popups/SearchPopup.jsx
 import Popup from "./Popup";
-import { S } from "../../styles/theme";
+import Input from "../ui/Input";
+import Button from "../ui/Button";
+import { T } from "../../styles/theme";
 
 export default function SearchPopup({ onClose }) {
   return (
     <Popup onClose={onClose}>
-      <p
-        style={{
-          fontSize: 11,
-          letterSpacing: "0.2em",
-          textTransform: "uppercase",
-          color: S.gold,
-          marginBottom: 12,
-        }}
-      >
+      <p style={{ ...T.eyebrow, letterSpacing: "0.2em", marginBottom: 12 }}>
         Pesquisar
       </p>
       <div style={{ display: "flex", gap: 8 }}>
-        <input
+        <Input
           autoFocus
           placeholder="Buscar produtos..."
-          style={{
-            flex: 1,
-            padding: "9px 12px",
-            border: `0.5px solid ${S.border}`,
-            borderRadius: 8,
-            fontSize: 14,
-            fontFamily: S.sans,
-            outline: "none",
-          }}
+          style={{ flex: 1, marginBottom: 0 }}
         />
-        <button
-          style={{
-            background: S.dark,
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            padding: "0 14px",
-            fontSize: 14,
-            cursor: "pointer",
-          }}
-        >
-          →
-        </button>
+        <Button style={{ padding: "0 14px" }}>→</Button>
       </div>
     </Popup>
   );

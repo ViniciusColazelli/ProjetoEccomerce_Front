@@ -11,12 +11,12 @@ export default function Popup({ onClose, children }) {
           position: "absolute",
           top: 72,
           right: 32,
-          background: "#fff",
-          border: `0.5px solid ${S.border}`,
-          borderRadius: 12,
+          background: S.white,
+          border: S.line,
+          borderRadius: S.radius.lg,
           padding: 24,
           width: 300,
-          boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          boxShadow: S.shadow.popup,
         }}
       >
         {children}

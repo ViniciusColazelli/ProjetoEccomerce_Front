@@ -1,48 +1,32 @@
 // context/AuthContext.js
 import { createContext, useContext, useState, useEffect } from "react";
-import { loginCliente, registrarCliente } from "../lib/api";
+import { loginCliente } from "../lib/api";
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [erro, setErro] = useState(null);
+  const [pronto, setPronto] = useState(false); // já leu o localStorage?
 
   useEffect(() => {
     const salvo = localStorage.getItem("usuario");
     if (salvo) setUsuario(JSON.parse(salvo));
+    setPronto(true);
   }, []);
 
-  // Cadastro — NÃO loga, só registra e retorna true para redirecionar ao /login
-  async function cadastrar({ nome, email, senha }) {
-    setLoading(true);
-    setErro(null);
-    try {
-      await registrarCliente({ nome, email, senha });
-      return true;
-    } catch (e) {
-      setErro(e.message);
-      return false;
-    } finally {
-      setLoading(false);
-    }
+  function salvarSessao(dados) {
+    localStorage.setItem("usuario", JSON.stringify(dados));
+    setUsuario(dados);
   }
 
-  // Login — cria sessão no back-end e salva { nome } no localStorage
-  async function login({ email, senha }) {
-    setLoading(true);
-    setErro(null);
-    try {
-      const result = await loginCliente({ email, senha });
-      salvarSessao(result);
-      return true;
-    } catch (e) {
-      setErro(e.message);
-      return false;
-    } finally {
-      setLoading(false);
-    }
+  // Cria sessão no back-end. Se falhar, o erro sobe para quem chamou.
+  async function login(credenciais) {
+    salvarSessao(await loginCliente(credenciais));
+  }
+
+  // Mantém o nome da Navbar em dia após editar o perfil
+  function atualizarUsuario(parcial) {
+    salvarSessao({ ...usuario, ...parcial });
   }
 
   function logout() {
@@ -50,18 +34,9 @@ export function AuthProvider({ children }) {
     setUsuario(null);
   }
 
-  function salvarSessao(dados) {
-    localStorage.setItem("usuario", JSON.stringify(dados));
-    setUsuario(dados);
-  }
-
-  function limparErro() {
-    setErro(null);
-  }
-
   return (
     <AuthContext.Provider
-      value={{ usuario, loading, erro, cadastrar, login, logout, limparErro }}
+      value={{ usuario, pronto, login, logout, atualizarUsuario }}
     >
       {children}
     </AuthContext.Provider>

@@ -1,67 +1,51 @@
 // components/popups/AuthPopup.jsx
 import { useState } from "react";
-import { useRouter } from "next/router";
 import Popup from "./Popup";
-import { S } from "../../styles/theme";
+import Input from "../ui/Input";
+import Alert from "../ui/Alert";
+import Button from "../ui/Button";
+import Icon from "../ui/Icon";
+import { S, T } from "../../styles/theme";
 import { useAuthContext } from "../../context/AuthContext";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { registrarCliente } from "../../lib/api";
+
+const TABS = { login: "Entrar", cadastro: "Cadastrar" };
+const VAZIO = { nome: "", email: "", senha: "" };
 
 export default function AuthPopup({ onClose }) {
-  const router = useRouter();
-
+  const { login } = useAuthContext();
   const [tab, setTab] = useState("login");
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [sucesso, setSucesso] = useState(false);
-  const [msgSucesso, setMsgSucesso] = useState("");
+  const [campos, setCampos] = useState(VAZIO);
+  const { nome, email, senha } = campos;
 
-  const { loading, erro, cadastrar, login, limparErro } = useAuthContext();
+  const entrar = useAsyncAction(login);
+  const cadastrar = useAsyncAction(registrarCliente);
+  const acao = tab === "login" ? entrar : cadastrar;
 
-  function trocarAba(novaAba) {
-    setTab(novaAba);
-    setNome("");
-    setEmail("");
-    setSenha("");
-    setSucesso(false);
-    limparErro();
+  const set = (campo) => (e) =>
+    setCampos((c) => ({ ...c, [campo]: e.target.value }));
+
+  function trocarAba(nova) {
+    setTab(nova);
+    setCampos(VAZIO);
+    entrar.reset();
+    cadastrar.reset();
   }
 
-  async function handleSubmit() {
-    if (tab === "cadastro") {
-      const ok = await cadastrar({ nome, email, senha });
-      if (ok) {
-        // Cadastro bem-sucedido — mostra mensagem e redireciona para login
-        setMsgSucesso("Cadastro realizado! Redirecionando para o login...");
-        setSucesso(true);
-        setTimeout(() => {
-          onClose();
-          trocarAba("login"); // muda para aba de login
-        }, 2000);
-      }
-    } else {
-      const ok = await login({ email, senha });
-      if (ok) {
-        setMsgSucesso("Login realizado com sucesso!");
-        setSucesso(true);
-        setTimeout(() => onClose(), 1500);
-      }
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const dados = tab === "login" ? { email, senha } : { nome, email, senha };
+    const ok = await acao.run(dados);
+    if (ok) {
+      // login: fecha o popup; cadastro: volta para a aba de login
+      setTimeout(tab === "login" ? onClose : () => trocarAba("login"), 1500);
     }
   }
 
-  const inputStyle = {
-    width: "100%",
-    padding: "9px 12px",
-    border: `0.5px solid ${S.border}`,
-    borderRadius: 8,
-    fontSize: 13,
-    fontFamily: S.sans,
-    marginBottom: 10,
-    boxSizing: "border-box",
-    outline: "none",
-  };
-
-  // ── Tela de sucesso ───────────────────────────────────────────
-  if (sucesso) {
+  // ── Tela de sucesso ─────────────────────────────────────────
+  if (acao.sucesso) {
+    const cadastro = tab === "cadastro";
     return (
       <Popup onClose={onClose}>
         <div style={{ textAlign: "center", padding: "16px 0" }}>
@@ -70,48 +54,37 @@ export default function AuthPopup({ onClose }) {
               width: 48,
               height: 48,
               borderRadius: "50%",
-              background: "#e6f4ea",
+              background: S.success.bg,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto 14px",
             }}
           >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#2e7d32"
-              strokeWidth="2.5"
-            >
-              <path d="M5 13l4 4L19 7" />
-            </svg>
+            <Icon name="check" size={24} color={S.success.text} stroke={2.5} />
           </div>
-          <p
-            style={{
-              fontFamily: S.serif,
-              fontSize: 16,
-              fontWeight: 700,
-              marginBottom: 6,
-            }}
-          >
-            {tab === "cadastro" ? "Cadastro realizado!" : "Bem-vindo de volta!"}
+          <p style={{ ...T.popupTitle, marginBottom: 6 }}>
+            {cadastro ? "Cadastro realizado!" : "Bem-vindo de volta!"}
           </p>
-          <p style={{ fontSize: 13, color: S.muted }}>{msgSucesso}</p>
+          <p style={{ fontSize: 13, color: S.muted }}>
+            {cadastro
+              ? "Redirecionando para o login..."
+              : "Login realizado com sucesso!"}
+          </p>
         </div>
       </Popup>
     );
   }
 
-  // ── Formulário ─────────────────────────────────────────────────
+  // ── Formulário ──────────────────────────────────────────────
   return (
     <Popup onClose={onClose}>
       <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
-        {["login", "cadastro"].map((t) => (
+        {Object.entries(TABS).map(([key, label]) => (
           <button
-            key={t}
-            onClick={() => trocarAba(t)}
+            key={key}
+            type="button"
+            onClick={() => trocarAba(key)}
             style={{
               padding: "6px 14px",
               borderRadius: 7,
@@ -119,87 +92,53 @@ export default function AuthPopup({ onClose }) {
               cursor: "pointer",
               border: "none",
               fontFamily: S.sans,
-              background: tab === t ? S.dark : "transparent",
-              color: tab === t ? "#fff" : S.muted,
+              background: tab === key ? S.dark : "transparent",
+              color: tab === key ? S.white : S.muted,
             }}
           >
-            {t === "login" ? "Entrar" : "Cadastrar"}
+            {label}
           </button>
         ))}
       </div>
 
-      <p
-        style={{
-          fontFamily: S.serif,
-          fontSize: 16,
-          fontWeight: 700,
-          marginBottom: 14,
-        }}
-      >
+      <p style={T.popupTitle}>
         {tab === "login" ? "Bem-vindo de volta" : "Criar conta"}
       </p>
 
-      {tab === "cadastro" && (
-        <input
-          placeholder="Nome completo"
-          value={nome}
-          onChange={(e) => setNome(e.target.value)}
-          style={inputStyle}
-          disabled={loading}
+      <form onSubmit={handleSubmit}>
+        {tab === "cadastro" && (
+          <Input
+            placeholder="Nome completo"
+            value={nome}
+            onChange={set("nome")}
+            disabled={acao.loading}
+          />
+        )}
+        <Input
+          type="email"
+          placeholder="E-mail"
+          value={email}
+          onChange={set("email")}
+          disabled={acao.loading}
         />
-      )}
-      <input
-        type="email"
-        placeholder="E-mail"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        style={inputStyle}
-        disabled={loading}
-      />
-      <input
-        type="password"
-        placeholder="Senha"
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-        style={inputStyle}
-        disabled={loading}
-      />
+        <Input
+          type="password"
+          placeholder="Senha"
+          value={senha}
+          onChange={set("senha")}
+          disabled={acao.loading}
+        />
 
-      {erro && (
-        <div
-          style={{
-            background: "#fff5f5",
-            border: "0.5px solid #fca5a5",
-            borderRadius: 8,
-            padding: "8px 12px",
-            marginBottom: 10,
-            fontSize: 12,
-            color: "#b91c1c",
-          }}
-        >
-          {erro}
-        </div>
-      )}
+        <Alert>{acao.erro}</Alert>
 
-      <button
-        onClick={handleSubmit}
-        disabled={loading}
-        style={{
-          width: "100%",
-          padding: 11,
-          background: loading ? "#555" : S.dark,
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          fontSize: 14,
-          fontFamily: S.sans,
-          cursor: loading ? "not-allowed" : "pointer",
-          marginTop: 4,
-        }}
-      >
-        {loading ? "Aguarde..." : tab === "login" ? "Entrar" : "Criar conta"}
-      </button>
+        <Button type="submit" full loading={acao.loading}>
+          {acao.loading
+            ? "Aguarde..."
+            : tab === "login"
+              ? "Entrar"
+              : "Criar conta"}
+        </Button>
+      </form>
 
       {tab === "login" && (
         <p
@@ -208,11 +147,16 @@ export default function AuthPopup({ onClose }) {
             color: S.muted,
             textAlign: "center",
             marginTop: 12,
-            cursor: "pointer",
           }}
         >
           Esqueceu a senha?{" "}
-          <span style={{ color: S.dark, textDecoration: "underline" }}>
+          <span
+            style={{
+              color: S.dark,
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+          >
             Recuperar
           </span>
         </p>

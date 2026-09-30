@@ -5,20 +5,20 @@ export default function Footer() {
   return (
     <footer
       style={{
-        borderTop: `0.5px solid ${S.border}`,
+        borderTop: S.line,
         padding: "26px 40px",
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
         fontSize: 12,
-        color: "#bbb",
+        color: S.faint,
       }}
     >
       <span
         style={{
           fontFamily: S.serif,
           fontSize: 14,
-          color: "#666",
+          color: S.soft,
           fontWeight: 700,
         }}
       >

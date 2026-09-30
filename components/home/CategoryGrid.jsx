@@ -1,6 +1,6 @@
 // components/home/CategoryGrid.jsx
 import CategoryCard from "../ui/CategoryCard";
-import { S } from "../../styles/theme";
+import { S, T } from "../../styles/theme";
 
 const CATEGORIES = [
   {
@@ -24,18 +24,7 @@ const CATEGORIES = [
 export default function CategoryGrid() {
   return (
     <section style={{ padding: "52px 40px 64px" }}>
-      <p
-        style={{
-          fontSize: 11,
-          letterSpacing: "0.22em",
-          textTransform: "uppercase",
-          color: S.gold,
-          fontWeight: 400,
-          marginBottom: 6,
-        }}
-      >
-        Explore
-      </p>
+      <p style={T.eyebrow}>Explore</p>
       <h2
         style={{
           fontFamily: S.serif,

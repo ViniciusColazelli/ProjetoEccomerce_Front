@@ -1,5 +1,7 @@
 // components/ui/CategoryCard.jsx
 import { useState } from "react";
+import { S } from "../../styles/theme";
+import Icon from "./Icon";
 
 export default function CategoryCard({ cat }) {
   const [hov, setHov] = useState(false);
@@ -9,14 +11,14 @@ export default function CategoryCard({ cat }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        borderRadius: 12,
+        borderRadius: S.radius.lg,
         overflow: "hidden",
         position: "relative",
         cursor: "pointer",
         aspectRatio: "3/4",
         transform: hov ? "translateY(-4px)" : "none",
         transition: "transform 0.2s, box-shadow 0.2s",
-        boxShadow: hov ? "0 8px 24px rgba(0,0,0,0.15)" : "none",
+        boxShadow: hov ? S.shadow.lift : "none",
       }}
     >
       <img
@@ -37,7 +39,7 @@ export default function CategoryCard({ cat }) {
           bottom: 0,
           left: 0,
           right: 0,
-          padding: "14px",
+          padding: 14,
           background: "rgba(17,17,17,0.82)",
           display: "flex",
           alignItems: "center",
@@ -48,7 +50,7 @@ export default function CategoryCard({ cat }) {
           style={{
             fontSize: 13,
             fontWeight: 500,
-            color: "#fff",
+            color: S.white,
             letterSpacing: "0.07em",
             textTransform: "uppercase",
           }}
@@ -59,7 +61,7 @@ export default function CategoryCard({ cat }) {
           style={{
             width: 28,
             height: 28,
-            background: "#fff",
+            background: S.white,
             borderRadius: "50%",
             display: "flex",
             alignItems: "center",
@@ -67,16 +69,7 @@ export default function CategoryCard({ cat }) {
             flexShrink: 0,
           }}
         >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#111"
-            strokeWidth="2.2"
-          >
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
+          <Icon name="arrow" size={13} color={S.dark} stroke={2.2} />
         </span>
       </div>
     </div>
