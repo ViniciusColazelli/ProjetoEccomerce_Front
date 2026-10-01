@@ -1,6 +1,6 @@
 // components/ui/Alert.jsx
 // Retorna null quando não há conteúdo, então dispensa o {erro && (...)} nas páginas
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 
 export default function Alert({ type = "error", children }) {
   if (!children) return null;

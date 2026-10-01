@@ -1,5 +1,5 @@
 // components/ui/Input.jsx
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 
 export default function Input({ style, ...props }) {
   return (

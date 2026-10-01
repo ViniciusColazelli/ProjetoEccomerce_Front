@@ -1,6 +1,6 @@
 // components/ui/CategoryCard.jsx
 import { useState } from "react";
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 import Icon from "./Icon";
 
 export default function CategoryCard({ cat }) {

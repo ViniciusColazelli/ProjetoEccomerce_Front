@@ -1,5 +1,5 @@
 // components/ui/Loading.jsx
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 
 export default function Loading() {
   return (

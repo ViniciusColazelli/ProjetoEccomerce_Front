@@ -1,6 +1,6 @@
 // components/home/CategoryGrid.jsx
-import CategoryCard from "../ui/CategoryCard";
-import { S, T } from "../../styles/theme";
+import CategoryCard from "components/ui/CategoryCard";
+import { S, T } from "styles/theme";
 
 const CATEGORIES = [
   {

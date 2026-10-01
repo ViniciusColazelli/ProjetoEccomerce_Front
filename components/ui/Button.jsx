@@ -1,5 +1,5 @@
 // components/ui/Button.jsx
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 
 const variants = {
   primary: { background: S.dark, color: S.white, border: "none" },

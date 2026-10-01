@@ -1,6 +1,6 @@
 // components/ui/FormField.jsx
 // Label + Input. O input fica dentro do label, então clicar no texto foca o campo.
-import { T } from "../../styles/theme";
+import { T } from "styles/theme";
 import Input from "./Input";
 
 export default function FormField({ label, ...props }) {

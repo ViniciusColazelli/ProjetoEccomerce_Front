@@ -1,7 +1,7 @@
 // components/popups/CartPopup.jsx
 import Popup from "./Popup";
-import Button from "../ui/Button";
-import { S, T } from "../../styles/theme";
+import Button from "components/ui/Button";
+import { S, T } from "styles/theme";
 
 export default function CartPopup({ onClose }) {
   return (

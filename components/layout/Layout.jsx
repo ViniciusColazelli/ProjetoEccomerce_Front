@@ -1,12 +1,12 @@
 // components/layout/Layout.jsx
 // Esqueleto global: popups + Navbar + conteúdo + Footer
-import { usePopup } from "../../hooks/usePopup";
-import { S } from "../../styles/theme";
+import { usePopup } from "hooks/usePopup";
+import { S } from "styles/theme";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
-import SearchPopup from "../popups/SearchPopup";
-import CartPopup from "../popups/CartPopup";
-import AuthPopup from "../popups/AuthPopup";
+import SearchPopup from "components/popups/SearchPopup";
+import CartPopup from "components/popups/CartPopup";
+import AuthPopup from "components/popups/AuthPopup";
 
 export default function Layout({ children }) {
   const { toggle, close, isOpen } = usePopup();

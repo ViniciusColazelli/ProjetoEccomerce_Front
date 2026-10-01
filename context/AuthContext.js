@@ -1,6 +1,6 @@
 // context/AuthContext.js
 import { createContext, useContext, useState, useEffect } from "react";
-import { loginCliente } from "../lib/api";
+import { loginCliente } from "lib/api";
 
 const AuthContext = createContext(null);
 

@@ -1,7 +1,7 @@
 // components/home/Hero.jsx
-import Button from "../ui/Button";
-import Icon from "../ui/Icon";
-import { S, T } from "../../styles/theme";
+import Button from "components/ui/Button";
+import Icon from "components/ui/Icon";
+import { S, T } from "styles/theme";
 
 export default function Hero() {
   return (

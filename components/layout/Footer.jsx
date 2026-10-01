@@ -1,5 +1,5 @@
 // components/layout/Footer.jsx
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 
 export default function Footer() {
   return (

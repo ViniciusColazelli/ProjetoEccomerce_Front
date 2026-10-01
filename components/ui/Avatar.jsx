@@ -1,5 +1,5 @@
 // components/ui/Avatar.jsx
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 
 export default function Avatar({ nome, size = 26 }) {
   return (

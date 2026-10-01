@@ -1,11 +1,11 @@
 // components/perfil/AlterarSenhaForm.jsx
 import { useState } from "react";
-import { trocarSenha } from "../../lib/api";
-import { useAsyncAction } from "../../hooks/useAsyncAction";
-import Card from "../ui/Card";
-import FormField from "../ui/FormField";
-import Alert from "../ui/Alert";
-import Button from "../ui/Button";
+import { trocarSenha } from "lib/api";
+import { useAsyncAction } from "hooks/useAsyncAction";
+import Card from "components/ui/Card";
+import FormField from "components/ui/FormField";
+import Alert from "components/ui/Alert";
+import Button from "components/ui/Button";
 
 export default function AlterarSenhaForm() {
   const [senhaAtual, setSenhaAtual] = useState("");

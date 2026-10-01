@@ -1,10 +1,10 @@
 // components/layout/Navbar.jsx
 import { useRouter } from "next/router";
-import NavBtn from "../ui/NavBtn";
-import Icon from "../ui/Icon";
+import NavBtn from "components/ui/NavBtn";
+import Icon from "components/ui/Icon";
 import UserMenu from "./UserMenu";
-import { S } from "../../styles/theme";
-import { useAuthContext } from "../../context/AuthContext";
+import { S } from "styles/theme";
+import { useAuthContext } from "context/AuthContext";
 
 export default function Navbar({ onSearch, onAuth, onCart }) {
   const router = useRouter();

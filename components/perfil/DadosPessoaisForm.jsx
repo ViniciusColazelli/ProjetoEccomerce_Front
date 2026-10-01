@@ -1,11 +1,11 @@
 // components/perfil/DadosPessoaisForm.jsx
 import { useState } from "react";
-import { atualizarCliente } from "../../lib/api";
-import { useAsyncAction } from "../../hooks/useAsyncAction";
-import Card from "../ui/Card";
-import FormField from "../ui/FormField";
-import Alert from "../ui/Alert";
-import Button from "../ui/Button";
+import { atualizarCliente } from "lib/api";
+import { useAsyncAction } from "hooks/useAsyncAction";
+import Card from "components/ui/Card";
+import FormField from "components/ui/FormField";
+import Alert from "components/ui/Alert";
+import Button from "components/ui/Button";
 
 export default function DadosPessoaisForm({ perfil, onSuccess }) {
   const [nome, setNome] = useState(perfil.nome ?? "");
