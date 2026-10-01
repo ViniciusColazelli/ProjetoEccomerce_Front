@@ -1,5 +1,5 @@
 // components/ui/Card.jsx
-import { S, T } from "../../styles/theme";
+import { S, T } from "styles/theme";
 
 export default function Card({ titulo, children, style }) {
   return (

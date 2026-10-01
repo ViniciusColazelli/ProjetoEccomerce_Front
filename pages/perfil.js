@@ -1,11 +1,11 @@
 // pages/perfil.js
-import { useAuthContext } from "../context/AuthContext";
-import { usePerfil } from "../hooks/usePerfil";
-import PerfilHeader from "../components/perfil/PerfilHeader";
-import DadosPessoaisForm from "../components/perfil/DadosPessoaisForm";
-import AlterarSenhaForm from "../components/perfil/AlterarSenhaForm";
-import Button from "../components/ui/Button";
-import Loading from "../components/ui/Loading";
+import { useAuthContext } from "context/AuthContext";
+import { usePerfil } from "hooks/usePerfil";
+import PerfilHeader from "components/perfil/PerfilHeader";
+import DadosPessoaisForm from "components/perfil/DadosPessoaisForm";
+import AlterarSenhaForm from "components/perfil/AlterarSenhaForm";
+import Button from "components/ui/Button";
+import Loading from "components/ui/Loading";
 
 export default function Perfil() {
   const { logout } = useAuthContext();

@@ -1,6 +1,6 @@
 // components/perfil/PerfilHeader.jsx
-import Avatar from "../ui/Avatar";
-import { S } from "../../styles/theme";
+import Avatar from "components/ui/Avatar";
+import { S } from "styles/theme";
 
 export default function PerfilHeader({ nome, email }) {
   return (

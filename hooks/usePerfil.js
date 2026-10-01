@@ -1,8 +1,8 @@
 // hooks/usePerfil.js
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { getPerfilCliente } from "../lib/api";
-import { useAuthContext } from "../context/AuthContext";
+import { getPerfilCliente } from "lib/api";
+import { useAuthContext } from "context/AuthContext";
 
 export function usePerfil() {
   const router = useRouter();

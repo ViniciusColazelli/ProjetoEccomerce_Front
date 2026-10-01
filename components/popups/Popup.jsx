@@ -1,6 +1,6 @@
 // components/popups/Popup.jsx
 // Wrapper base reutilizado por todos os popups
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 
 export default function Popup({ onClose, children }) {
   return (

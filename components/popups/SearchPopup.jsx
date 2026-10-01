@@ -1,8 +1,8 @@
 // components/popups/SearchPopup.jsx
 import Popup from "./Popup";
-import Input from "../ui/Input";
-import Button from "../ui/Button";
-import { T } from "../../styles/theme";
+import Input from "components/ui/Input";
+import Button from "components/ui/Button";
+import { T } from "styles/theme";
 
 export default function SearchPopup({ onClose }) {
   return (

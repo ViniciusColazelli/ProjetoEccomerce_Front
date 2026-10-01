@@ -1,14 +1,14 @@
 // components/popups/AuthPopup.jsx
 import { useState } from "react";
 import Popup from "./Popup";
-import Input from "../ui/Input";
-import Alert from "../ui/Alert";
-import Button from "../ui/Button";
-import Icon from "../ui/Icon";
-import { S, T } from "../../styles/theme";
-import { useAuthContext } from "../../context/AuthContext";
-import { useAsyncAction } from "../../hooks/useAsyncAction";
-import { registrarCliente } from "../../lib/api";
+import Input from "components/ui/Input";
+import Alert from "components/ui/Alert";
+import Button from "components/ui/Button";
+import Icon from "components/ui/Icon";
+import { S, T } from "styles/theme";
+import { useAuthContext } from "context/AuthContext";
+import { useAsyncAction } from "hooks/useAsyncAction";
+import { registrarCliente } from "lib/api";
 
 const TABS = { login: "Entrar", cadastro: "Cadastrar" };
 const VAZIO = { nome: "", email: "", senha: "" };

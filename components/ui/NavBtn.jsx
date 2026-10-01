@@ -1,6 +1,6 @@
 // components/ui/NavBtn.jsx
 import { useState } from "react";
-import { S } from "../../styles/theme";
+import { S } from "styles/theme";
 
 export default function NavBtn({ onClick, badge, children }) {
   const [hov, setHov] = useState(false);

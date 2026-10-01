@@ -2,10 +2,10 @@
 // Botão com avatar + dropdown (Minha conta / Sair)
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { S } from "../../styles/theme";
-import { useAuthContext } from "../../context/AuthContext";
-import Avatar from "../ui/Avatar";
-import Icon from "../ui/Icon";
+import { S } from "styles/theme";
+import { useAuthContext } from "context/AuthContext";
+import Avatar from "components/ui/Avatar";
+import Icon from "components/ui/Icon";
 
 function MenuItem({ onClick, color = S.dark, children }) {
   return (
