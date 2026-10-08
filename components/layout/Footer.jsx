@@ -35,7 +35,12 @@ export default function Footer() {
           <img
             src="/logo.png"
             alt="Belíssima Uniformes"
-            style={{ height: 60, width: "auto", display: "block" }}
+            style={{
+              height: 82,
+              width: "auto",
+              objectFit: "contain",
+              display: "block",
+            }}
           />
           <p
             style={{
