@@ -6,16 +6,18 @@ export default function Popup({ onClose, children }) {
   return (
     <div onClick={onClose} style={{ position: "fixed", inset: 0, zIndex: 200 }}>
       <div
+        className="bu-pop"
         onClick={(e) => e.stopPropagation()}
         style={{
           position: "absolute",
-          top: 72,
-          right: 32,
+          top: 118,
+          right: 16,
           background: S.white,
           border: S.line,
-          borderRadius: S.radius.lg,
+          borderRadius: S.radius.xl,
           padding: 24,
-          width: 300,
+          width: 320,
+          maxWidth: "calc(100vw - 32px)",
           boxShadow: S.shadow.popup,
         }}
       >

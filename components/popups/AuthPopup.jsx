@@ -92,7 +92,7 @@ export default function AuthPopup({ onClose }) {
               cursor: "pointer",
               border: "none",
               fontFamily: S.sans,
-              background: tab === key ? S.dark : "transparent",
+              background: tab === key ? S.primary : "transparent",
               color: tab === key ? S.white : S.muted,
             }}
           >

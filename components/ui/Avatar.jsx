@@ -8,7 +8,7 @@ export default function Avatar({ nome, size = 26 }) {
         width: size,
         height: size,
         borderRadius: "50%",
-        background: S.gold,
+        background: S.secondary,
         color: S.white,
         display: "flex",
         alignItems: "center",

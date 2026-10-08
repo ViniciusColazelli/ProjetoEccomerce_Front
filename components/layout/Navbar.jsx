@@ -1,83 +1,122 @@
 // components/layout/Navbar.jsx
-import { useRouter } from "next/router";
+// Faixa de contato + barra principal (logo, links e ações), fixas no topo
+import Link from "next/link";
 import NavBtn from "components/ui/NavBtn";
 import Icon from "components/ui/Icon";
 import UserMenu from "./UserMenu";
 import { S } from "styles/theme";
 import { useAuthContext } from "context/AuthContext";
+import { CONTATO, WHATSAPP_URL, INSTAGRAM_URL } from "lib/contato";
+
+const LINKS = [
+  { label: "Início", href: "/" },
+  { label: "Categorias", href: "/#categorias" },
+  { label: "Sobre", href: "/#sobre" },
+  { label: "Contato", href: "#contato" },
+];
+
+const externo = { target: "_blank", rel: "noopener noreferrer" };
+
+function TopBar() {
+  return (
+    <div style={{ background: S.primary, color: S.white, fontSize: 12 }}>
+      <div
+        className="bu-container"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 34,
+          gap: 16,
+        }}
+      >
+        <span className="bu-topbar-msg" style={{ letterSpacing: "0.04em" }}>
+          Roupas com qualidade
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+          <a
+            href={WHATSAPP_URL}
+            {...externo}
+            style={{ display: "flex", alignItems: "center", gap: 6 }}
+          >
+            <Icon name="whatsapp" size={14} color={S.white} stroke={1.8} />
+            {CONTATO.celular}
+          </a>
+          <a
+            href={INSTAGRAM_URL}
+            {...externo}
+            style={{ display: "flex", alignItems: "center", gap: 6 }}
+          >
+            <Icon name="instagram" size={14} color={S.white} stroke={1.8} />@
+            {CONTATO.instagram}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function Navbar({ onSearch, onAuth, onCart }) {
-  const router = useRouter();
   const { usuario } = useAuthContext();
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "18px 40px",
-        borderBottom: S.line,
-        background: S.white,
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
-      }}
-    >
-      {/* Logo — redireciona para a home */}
-      <button
-        onClick={() => router.push("/")}
+    <header style={{ position: "sticky", top: 0, zIndex: 100 }}>
+      <TopBar />
+      <nav
         style={{
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-          textAlign: "left",
+          background: "rgba(255,255,255,0.9)",
+          backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
+          borderBottom: S.line,
         }}
       >
         <div
+          className="bu-container"
           style={{
-            fontFamily: S.serif,
-            fontSize: 20,
-            fontWeight: 700,
-            letterSpacing: "0.02em",
-            color: S.dark,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            height: 76,
+            gap: 24,
           }}
         >
-          BelissimaUniformes
+          {/* Logo — redireciona para a home */}
+          <Link href="/" aria-label="Belíssima Uniformes — início">
+            <img
+              src="/logo.png"
+              alt="Belíssima Uniformes"
+              style={{ height: 54, width: "auto", display: "block" }}
+            />
+          </Link>
+
+          <div className="bu-nav-links" style={{ display: "flex", gap: 32 }}>
+            {LINKS.map((l) => (
+              <Link key={l.label} href={l.href} className="bu-nav-link">
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Ações */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <NavBtn onClick={onSearch}>
+              <Icon name="search" />
+            </NavBtn>
+
+            {usuario ? (
+              <UserMenu />
+            ) : (
+              <NavBtn onClick={onAuth}>
+                <Icon name="user" />
+              </NavBtn>
+            )}
+
+            <NavBtn onClick={onCart} badge>
+              <Icon name="bag" />
+            </NavBtn>
+          </div>
         </div>
-        <div
-          style={{
-            fontSize: 10,
-            letterSpacing: "0.22em",
-            color: S.muted,
-            textTransform: "uppercase",
-            marginTop: 2,
-            fontWeight: 300,
-          }}
-        >
-          Roupas com Qualidade
-        </div>
-      </button>
-
-      {/* Ações */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <NavBtn onClick={onSearch}>
-          <Icon name="search" />
-        </NavBtn>
-
-        {usuario ? (
-          <UserMenu />
-        ) : (
-          <NavBtn onClick={onAuth}>
-            <Icon name="user" />
-          </NavBtn>
-        )}
-
-        <NavBtn onClick={onCart} badge>
-          <Icon name="bag" />
-        </NavBtn>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 }

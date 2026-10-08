@@ -1,0 +1,271 @@
+/* styles/globals.css
+   Reset, fontes, estados de hover/foco e responsividade.
+   As cores e medidas continuam em styles/theme.js — aqui fica só o que
+   estilo inline não consegue fazer (:hover, ::after, @media, @keyframes). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 120px;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: #a52021;
+  color: #fff;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #a52021;
+  outline-offset: 2px;
+}
+
+input:focus {
+  border-color: #647c84 !important;
+  box-shadow: 0 0 0 3px rgba(100, 124, 132, 0.15);
+}
+
+/* ── Layout ─────────────────────────────────────────────── */
+.bu-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.bu-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+.bu-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.bu-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.bu-strip-item {
+  padding: 32px 32px 32px 0;
+}
+.bu-strip-item + .bu-strip-item {
+  border-left: 0.5px solid #e2e2e2;
+  padding-left: 32px;
+}
+
+.bu-footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 48px;
+}
+
+/* ── Interações ─────────────────────────────────────────── */
+.bu-btn {
+  transition:
+    filter 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+.bu-btn:hover:not(:disabled) {
+  filter: brightness(0.92);
+  transform: translateY(-1px);
+}
+
+.bu-nav-link {
+  position: relative;
+  font-size: 14px;
+  color: #555;
+  padding: 6px 0;
+  transition: color 0.15s;
+}
+.bu-nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1.5px;
+  width: 0;
+  background: #a52021;
+  transition: width 0.2s;
+}
+.bu-nav-link:hover {
+  color: #111;
+}
+.bu-nav-link:hover::after {
+  width: 100%;
+}
+
+.bu-link-muted {
+  transition: color 0.15s;
+}
+.bu-link-muted:hover {
+  color: #a52021 !important;
+}
+
+.bu-cat-card img {
+  transition: transform 0.4s ease;
+}
+.bu-cat-card:hover img {
+  transform: scale(1.03);
+}
+.bu-cat-link {
+  color: #999;
+  transition: color 0.15s;
+}
+.bu-cat-card:hover .bu-cat-link {
+  color: #a52021;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.bu-text-link {
+  font-size: 14px;
+  color: #333;
+  text-decoration: underline;
+  text-decoration-color: #ccc;
+  text-underline-offset: 4px;
+  transition: text-decoration-color 0.15s;
+}
+.bu-text-link:hover {
+  text-decoration-color: #a52021;
+}
+/* ── Animações ──────────────────────────────────────────── */
+@keyframes bu-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.bu-pop {
+  animation: bu-pop 0.18s ease-out;
+}
+
+/* ── Responsivo ─────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .bu-hero-grid {
+    grid-template-columns: 1fr;
+  }
+  .bu-hero-visual {
+    height: 320px !important;
+  }
+  .bu-cat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bu-strip {
+    grid-template-columns: 1fr;
+  }
+  .bu-strip-item,
+  .bu-strip-item + .bu-strip-item {
+    padding: 20px 0;
+    border-left: none;
+  }
+  .bu-strip-item + .bu-strip-item {
+    border-top: 0.5px solid #e2e2e2;
+  }
+  .bu-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bu-strip-item {
+    padding: 32px 32px 32px 0;
+  }
+  .bu-strip-item + .bu-strip-item {
+    border-left: 0.5px solid #e2e2e2;
+    padding-left: 32px;
+  }
+
+  .bu-footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .bu-nav-links {
+    display: none !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .bu-container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .bu-topbar-msg {
+    display: none;
+  }
+  .bu-hero-title {
+    font-size: 38px !important;
+  }
+  .bu-section-title {
+    font-size: 28px !important;
+  }
+  .bu-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bu-strip-item {
+    padding: 32px 32px 32px 0;
+  }
+  .bu-strip-item + .bu-strip-item {
+    border-left: 0.5px solid #e2e2e2;
+    padding-left: 32px;
+  }
+
+  .bu-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .bu-cta {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+  .bu-bottom-bar {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
