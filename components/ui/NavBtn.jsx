@@ -32,7 +32,7 @@ export default function NavBtn({ onClick, badge, children }) {
             right: 5,
             width: 7,
             height: 7,
-            background: S.danger,
+            background: S.primary,
             borderRadius: "50%",
           }}
         />

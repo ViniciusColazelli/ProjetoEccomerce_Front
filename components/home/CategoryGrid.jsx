@@ -1,61 +1,36 @@
 // components/home/CategoryGrid.jsx
 import CategoryCard from "components/ui/CategoryCard";
-import { S, T } from "styles/theme";
-
-const CATEGORIES = [
-  {
-    name: "Calças",
-    img: "https://media.istockphoto.com/id/1221134337/pt/foto/front-views-black-trousers.jpg?b=1&s=612x612&w=0&k=20&c=syywxyifQDpCpPT-ZhW6TBgkWFciwVyiNr9kLvNSz5E=",
-  },
-  {
-    name: "Camisas",
-    img: "https://media.istockphoto.com/id/694412908/pt/foto/black-t-shirt-front-and-back-isolated-on-white-background-with-clipping-path.jpg?b=1&s=612x612&w=0&k=20&c=MTvI74ccVt8EKoBdP8nNHXjflb5bYFnbtlJNb9yIO3A=",
-  },
-  {
-    name: "Blusas",
-    img: "https://media.istockphoto.com/id/2177201906/pt/foto/black-mens-hooded-sweatshirt.jpg?b=1&s=612x612&w=0&k=20&c=NhCqZPNyoFQcSkqkfrrs1cBxhUIJbLBg8ViH0AJPQ20=",
-  },
-  {
-    name: "Shorts",
-    img: "https://media.istockphoto.com/id/973758234/pt/foto/black-mens-shorts.jpg?b=1&s=612x612&w=0&k=20&c=a5TOZ6cKUIOXigzwhMi6o59tRA4-iKWSF-KhaHOwbqI=",
-  },
-];
+import { S } from "styles/theme";
+import { CATEGORIES } from "lib/categorias";
 
 export default function CategoryGrid() {
   return (
-    <section style={{ padding: "52px 40px 64px" }}>
-      <p style={T.eyebrow}>Explore</p>
-      <h2
-        style={{
-          fontFamily: S.serif,
-          fontSize: 28,
-          fontWeight: 700,
-          color: S.dark,
-        }}
-      >
-        +Categorias
-      </h2>
-      <p
-        style={{
-          fontSize: 14,
-          color: S.muted,
-          marginTop: 5,
-          marginBottom: 30,
-          fontWeight: 300,
-        }}
-      >
-        A peça certa para cada necessidade.
-      </p>
+    <section id="categorias">
       <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4,1fr)",
-          gap: 16,
-        }}
+        className="bu-container"
+        style={{ paddingTop: 64, paddingBottom: 72 }}
       >
-        {CATEGORIES.map((cat) => (
-          <CategoryCard key={cat.name} cat={cat} />
-        ))}
+        <div style={{ marginBottom: 28 }}>
+          <h2
+            className="bu-section-title"
+            style={{
+              fontFamily: S.serif,
+              fontSize: 32,
+              fontWeight: 700,
+              color: S.dark,
+            }}
+          >
+            +Categorias
+          </h2>
+          <p style={{ fontSize: 15, color: S.muted, marginTop: 6 }}>
+            A peça certa para cada necessidade.
+          </p>
+        </div>
+        <div className="bu-cat-grid">
+          {CATEGORIES.map((cat) => (
+            <CategoryCard key={cat.name} cat={cat} />
+          ))}
+        </div>
       </div>
     </section>
   );

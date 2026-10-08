@@ -4,16 +4,22 @@
 const border = "#e2e2e2";
 
 export const S = {
+  // cores da marca (logo Belíssima Uniformes)
+  primary: "#A52021",
+  primaryHover: "#861A1B",
+  secondary: "#647C84",
+  secondaryDark: "#46585E",
+
   // cores base
-  gold: "#8B6914",
+  gold: "#A52021",
   dark: "#111111",
   muted: "#999999",
   soft: "#666666",
   faint: "#bbbbbb",
   white: "#ffffff",
   border,
-  heroBg: "#F2EFE8",
-  pageBg: "#FAFAF7",
+  heroBg: "#EEF2F3",
+  pageBg: "#FAFBFB",
   hoverBg: "#f5f5f5",
   disabled: "#555555",
   danger: "#c0392b",
@@ -23,7 +29,7 @@ export const S = {
   success: { bg: "#f0fdf4", border: "#86efac", text: "#166534" },
 
   // tipografia
-  serif: "Georgia, serif",
+  serif: "'Playfair Display', Georgia, serif",
   sans: "'DM Sans', Arial, sans-serif",
 
   // forma
