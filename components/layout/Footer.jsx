@@ -2,7 +2,15 @@
 import Link from "next/link";
 import Icon from "components/ui/Icon";
 import { S } from "styles/theme";
-import { CONTATO, WHATSAPP_URL, INSTAGRAM_URL } from "lib/contato";
+import {
+  CONTATO,
+  WHATSAPP_URL,
+  INSTAGRAM_URL,
+  MAPS_URL,
+  MAPS_EMBED_URL,
+  ENDERECO,
+  HORARIO,
+} from "lib/contato";
 
 const titulo = {
   fontSize: 12,
@@ -92,6 +100,79 @@ export default function Footer() {
             <Icon name="instagram" size={16} color={S.primary} stroke={1.8} />@
             {CONTATO.instagram}
           </a>
+        </div>
+
+        <div style={{ minWidth: 260 }}>
+          <p style={titulo}>ONDE ESTAMOS</p>
+          <div
+            style={{
+              ...item,
+              alignItems: "flex-start",
+              lineHeight: 1.5,
+              marginBottom: 10,
+            }}
+          >
+            <Icon
+              name="mapPin"
+              size={16}
+              color={S.primary}
+              stroke={1.8}
+              style={{ flexShrink: 0, marginTop: 2 }}
+            />
+            <span>{ENDERECO}</span>
+          </div>
+
+          <div
+            style={{
+              ...item,
+              alignItems: "center",
+              lineHeight: 1.5,
+              marginBottom: 10,
+            }}
+          >
+            <Icon
+              name="clock"
+              size={16}
+              color={S.primary}
+              stroke={1.8}
+              style={{ flexShrink: 0 }}
+            />
+            <span>{HORARIO}</span>
+          </div>
+
+          <div style={{ marginBottom: 14 }}>
+            <a
+              href={MAPS_URL}
+              {...externo}
+              className="bu-link-muted"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 13,
+                fontWeight: 500,
+                color: S.primary,
+              }}
+            >
+              <Icon name="external" size={13} color={S.primary} stroke={1.8} />
+              Ver no Google Maps
+            </a>
+          </div>
+
+          <iframe
+            src={MAPS_EMBED_URL}
+            width="100%"
+            height="220"
+            style={{
+              border: 0,
+              borderRadius: "8px",
+              display: "block",
+            }}
+            allowFullScreen=""
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+            title="Localização Belíssima Uniformes no Google Maps"
+          />
         </div>
       </div>
 
