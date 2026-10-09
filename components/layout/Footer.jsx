@@ -6,8 +6,6 @@ import {
   CONTATO,
   WHATSAPP_URL,
   INSTAGRAM_URL,
-  MAPS_URL,
-  MAPS_EMBED_URL,
   ENDERECO,
   HORARIO,
 } from "lib/contato";
@@ -102,9 +100,9 @@ export default function Footer() {
           </a>
         </div>
 
-        <div style={{ minWidth: 260 }}>
-          <p style={titulo}>ONDE ESTAMOS</p>
-          <div
+        <div>
+          <h3 style={titulo}>ONDE ESTAMOS</h3>
+          <p
             style={{
               ...item,
               alignItems: "flex-start",
@@ -120,14 +118,14 @@ export default function Footer() {
               style={{ flexShrink: 0, marginTop: 2 }}
             />
             <span>{ENDERECO}</span>
-          </div>
+          </p>
 
-          <div
+          <p
             style={{
               ...item,
               alignItems: "center",
               lineHeight: 1.5,
-              marginBottom: 10,
+              marginBottom: 16,
             }}
           >
             <Icon
@@ -138,41 +136,26 @@ export default function Footer() {
               style={{ flexShrink: 0 }}
             />
             <span>{HORARIO}</span>
-          </div>
+          </p>
 
-          <div style={{ marginBottom: 14 }}>
-            <a
-              href={MAPS_URL}
-              {...externo}
-              className="bu-link-muted"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 6,
-                fontSize: 13,
-                fontWeight: 500,
-                color: S.primary,
-              }}
-            >
-              <Icon name="external" size={13} color={S.primary} stroke={1.8} />
-              Ver no Google Maps
-            </a>
-          </div>
-
-          <iframe
-            src={MAPS_EMBED_URL}
-            width="100%"
-            height="220"
+          <div
             style={{
-              border: 0,
+              width: "100%",
+              height: "200px",
               borderRadius: "8px",
-              display: "block",
+              overflow: "hidden",
             }}
-            allowFullScreen=""
-            loading="lazy"
-            referrerPolicy="strict-origin-when-cross-origin"
-            title="Localização Belíssima Uniformes no Google Maps"
-          />
+          >
+            <iframe
+              src="https://maps.google.com/maps?q=-23.672813,-46.480092&hl=pt-BR&z=17&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
         </div>
       </div>
 

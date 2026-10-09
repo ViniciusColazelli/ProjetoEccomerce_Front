@@ -89,8 +89,8 @@ input:focus {
 
 .bu-footer-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.7fr 0.9fr 1.5fr;
-  gap: 40px;
+  grid-template-columns: 1.1fr 1fr 1.1fr 1.3fr;
+  gap: 2.5rem;
 }
 
 /* ── Interações ─────────────────────────────────────────── */
@@ -214,6 +214,7 @@ input:focus {
 
   .bu-footer-grid {
     grid-template-columns: 1fr 1fr;
+    gap: 2.25rem;
   }
   .bu-nav-links {
     display: none !important;
@@ -248,7 +249,7 @@ input:focus {
 
   .bu-footer-grid {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 2rem;
   }
   .bu-cta {
     flex-direction: column;
