@@ -2,7 +2,13 @@
 import Link from "next/link";
 import Icon from "components/ui/Icon";
 import { S } from "styles/theme";
-import { CONTATO, WHATSAPP_URL, INSTAGRAM_URL } from "lib/contato";
+import {
+  CONTATO,
+  WHATSAPP_URL,
+  INSTAGRAM_URL,
+  ENDERECO,
+  HORARIO,
+} from "lib/contato";
 
 const titulo = {
   fontSize: 12,
@@ -35,7 +41,12 @@ export default function Footer() {
           <img
             src="/logo.png"
             alt="Belíssima Uniformes"
-            style={{ height: 60, width: "auto", display: "block" }}
+            style={{
+              height: 82,
+              width: "auto",
+              objectFit: "contain",
+              display: "block",
+            }}
           />
           <p
             style={{
@@ -87,6 +98,64 @@ export default function Footer() {
             <Icon name="instagram" size={16} color={S.primary} stroke={1.8} />@
             {CONTATO.instagram}
           </a>
+        </div>
+
+        <div>
+          <h3 style={titulo}>ONDE ESTAMOS</h3>
+          <p
+            style={{
+              ...item,
+              alignItems: "flex-start",
+              lineHeight: 1.5,
+              marginBottom: 10,
+            }}
+          >
+            <Icon
+              name="mapPin"
+              size={16}
+              color={S.primary}
+              stroke={1.8}
+              style={{ flexShrink: 0, marginTop: 2 }}
+            />
+            <span>{ENDERECO}</span>
+          </p>
+
+          <p
+            style={{
+              ...item,
+              alignItems: "center",
+              lineHeight: 1.5,
+              marginBottom: 16,
+            }}
+          >
+            <Icon
+              name="clock"
+              size={16}
+              color={S.primary}
+              stroke={1.8}
+              style={{ flexShrink: 0 }}
+            />
+            <span>{HORARIO}</span>
+          </p>
+
+          <div
+            style={{
+              width: "100%",
+              height: "200px",
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
+          >
+            <iframe
+              src="https://maps.google.com/maps?q=-23.672813,-46.480092&hl=pt-BR&z=17&output=embed"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </div>
         </div>
       </div>
 

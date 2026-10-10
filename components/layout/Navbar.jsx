@@ -76,20 +76,34 @@ export default function Navbar({ onSearch, onAuth, onCart }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            height: 76,
+            minHeight: 100,
+            paddingTop: 10,
+            paddingBottom: 10,
             gap: 24,
           }}
         >
           {/* Logo — redireciona para a home */}
-          <Link href="/" aria-label="Belíssima Uniformes — início">
+          <Link
+            href="/"
+            aria-label="Belíssima Uniformes — início"
+            style={{ display: "flex", alignItems: "center" }}
+          >
             <img
               src="/logo.png"
               alt="Belíssima Uniformes"
-              style={{ height: 54, width: "auto", display: "block" }}
+              style={{
+                height: 85,
+                width: "auto",
+                objectFit: "contain",
+                display: "block",
+              }}
             />
           </Link>
 
-          <div className="bu-nav-links" style={{ display: "flex", gap: 32 }}>
+          <div
+            className="bu-nav-links"
+            style={{ display: "flex", alignItems: "center", gap: 32 }}
+          >
             {LINKS.map((l) => (
               <Link key={l.label} href={l.href} className="bu-nav-link">
                 {l.label}
