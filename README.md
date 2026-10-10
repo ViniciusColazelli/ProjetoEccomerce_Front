@@ -5,3 +5,5 @@
 E-commerce desenvolvido para uma **empresa real do segmento de vestuário**, com foco em aplicar conhecimentos de desenvolvimento de software na construção de uma solução baseada em necessidades reais de negócio.
 
 **Tecnologias:** C# • .NET • PostgreSQL • React
+
+*Criadores:* Michel Coutinho da Silva, Vinicius Gonçalves Pereira Colazelli, Paulo Victor Cid, Gabriel Coutinho da Silva.
