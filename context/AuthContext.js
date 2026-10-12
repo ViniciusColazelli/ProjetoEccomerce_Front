@@ -1,23 +1,43 @@
 // context/AuthContext.js
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { loginCliente } from "lib/api";
+import { loginCliente, logoutCliente, getPerfilCliente } from "lib/api";
 
 const AuthContext = createContext(null);
 
+// Checagem que não pode disparar "sessão expirada": visitante anônimo recebe 401
+const CHECAGEM_SILENCIOSA = { ignorarSessaoExpirada: true };
+
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
-  const [pronto, setPronto] = useState(false); // já leu o localStorage?
+  const [pronto, setPronto] = useState(false); // já perguntou à API se há sessão?
   const router = useRouter();
 
+  // Ao carregar: a API (via cookie) decide se existe sessão
   useEffect(() => {
-    const salvo = localStorage.getItem("usuario");
-    const token = localStorage.getItem("token");
-    if (salvo && token) setUsuario(JSON.parse(salvo));
-    setPronto(true);
+    // limpa resquícios de versões antigas que guardavam dados no navegador
+    localStorage.removeItem("token");
+    localStorage.removeItem("usuario");
+
+    let cancelado = false;
+
+    getPerfilCliente(CHECAGEM_SILENCIOSA)
+      .then((perfil) => {
+        if (!cancelado) setUsuario({ nome: perfil.nome, email: perfil.email });
+      })
+      .catch(() => {
+        if (!cancelado) setUsuario(null); // sem sessão válida
+      })
+      .finally(() => {
+        if (!cancelado) setPronto(true);
+      });
+
+    return () => {
+      cancelado = true;
+    };
   }, []);
 
-  // Reage quando lib/api.js detecta um 401 em rota autenticada
+  // Reage quando lib/api.js detecta 401 numa rota autenticada
   useEffect(() => {
     function aoExpirar() {
       setUsuario(null);
@@ -28,29 +48,25 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener("sessao-expirada", aoExpirar);
   }, [router]);
 
-  function salvarSessao(dados) {
-    const { token, ...resto } = dados;
-
-    if (token) localStorage.setItem("token", token);
-    localStorage.setItem("usuario", JSON.stringify(resto));
-    setUsuario(resto);
-  }
-
-  // Autentica no back-end e guarda o token JWT retornado
+  // O login grava o cookie; em seguida buscamos o perfil completo.
+  // Se o cookie não foi aceito, esta chamada falha e o erro aparece no formulário.
   async function login(credenciais) {
-    salvarSessao(await loginCliente(credenciais));
+    await loginCliente(credenciais);
+    const perfil = await getPerfilCliente(CHECAGEM_SILENCIOSA);
+    setUsuario({ nome: perfil.nome, email: perfil.email });
   }
 
   // Mantém o nome da Navbar em dia após editar o perfil
   function atualizarUsuario(parcial) {
-    const dadosAtualizados = { ...usuario, ...parcial };
-    localStorage.setItem("usuario", JSON.stringify(dadosAtualizados));
-    setUsuario(dadosAtualizados);
+    setUsuario((atual) => ({ ...atual, ...parcial }));
   }
 
-  function logout() {
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("token");
+  async function logout() {
+    try {
+      await logoutCliente(); // a API apaga o cookie
+    } catch {
+      // mesmo se falhar, encerra a sessão local
+    }
     setUsuario(null);
   }
 
