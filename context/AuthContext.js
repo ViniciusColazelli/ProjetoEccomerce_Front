@@ -19,7 +19,12 @@ export function AuthProvider({ children }) {
 
     getPerfilCliente(CHECAGEM_SILENCIOSA)
       .then((perfil) => {
-        if (!cancelado) setUsuario({ nome: perfil.nome, email: perfil.email });
+        if (!cancelado)
+          setUsuario({
+            nome: perfil.nome,
+            email: perfil.email,
+            role: perfil.role,
+          });
       })
       .catch(() => {
         if (!cancelado) setUsuario(null); // sem sessão válida
@@ -49,7 +54,11 @@ export function AuthProvider({ children }) {
   async function login(credenciais) {
     await loginCliente(credenciais);
     const perfil = await getPerfilCliente(CHECAGEM_SILENCIOSA);
-    setUsuario({ nome: perfil.nome, email: perfil.email });
+    setUsuario({
+      nome: perfil.nome,
+      email: perfil.email,
+      role: perfil.role,
+    });
   }
 
   // Mantém o nome da Navbar em dia após editar o perfil
@@ -66,9 +75,11 @@ export function AuthProvider({ children }) {
     setUsuario(null);
   }
 
+  const isAdmin = usuario?.role === "Admin"; // mesmo valor de Perfis.Admin
+
   return (
     <AuthContext.Provider
-      value={{ usuario, pronto, login, logout, atualizarUsuario }}
+      value={{ usuario, pronto, isAdmin, login, logout, atualizarUsuario }}
     >
       {children}
     </AuthContext.Provider>
