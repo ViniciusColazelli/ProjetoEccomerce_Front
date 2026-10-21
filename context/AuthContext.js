@@ -15,10 +15,6 @@ export function AuthProvider({ children }) {
 
   // Ao carregar: a API (via cookie) decide se existe sessão
   useEffect(() => {
-    // limpa resquícios de versões antigas que guardavam dados no navegador
-    localStorage.removeItem("token");
-    localStorage.removeItem("usuario");
-
     let cancelado = false;
 
     getPerfilCliente(CHECAGEM_SILENCIOSA)
