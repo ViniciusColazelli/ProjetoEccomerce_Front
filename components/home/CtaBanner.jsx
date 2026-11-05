@@ -1,8 +1,8 @@
 // components/home/CtaBanner.jsx
 // Chamada para pedidos pelo WhatsApp
 import Button from "components/ui/Button";
-import { S } from "styles/theme";
-import { CONTATO, WHATSAPP_URL } from "lib/contato";
+import { S, T } from "styles/theme";
+import { CONTATO, WHATSAPP_URL, LINK_EXTERNO } from "lib/contato";
 
 export default function CtaBanner() {
   return (
@@ -21,12 +21,7 @@ export default function CtaBanner() {
         <div>
           <h2
             className="bu-section-title"
-            style={{
-              fontFamily: S.serif,
-              fontSize: 30,
-              fontWeight: 700,
-              marginBottom: 8,
-            }}
+            style={{ ...T.titulo, fontSize: 30, marginBottom: 8 }}
           >
             Precisa de uniforme para a sua equipe?
           </h2>
@@ -38,8 +33,7 @@ export default function CtaBanner() {
         <div style={{ flexShrink: 0 }}>
           <Button
             href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
+            {...LINK_EXTERNO}
             variant="light"
             style={{ padding: "13px 26px" }}
           >

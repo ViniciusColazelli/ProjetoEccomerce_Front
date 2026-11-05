@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 // Coloca o segredo na requisição que o rewrite /backend repassa para a API.
 // A API só confia no IP do cliente (X-Forwarded-For) quando o segredo confere.
-export function middleware(request) {
+export function proxy(request) {
   const segredo = process.env.PROXY_SEGREDO;
 
   if (!segredo) return NextResponse.next(); // local, sem segredo configurado

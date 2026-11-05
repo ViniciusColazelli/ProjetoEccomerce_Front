@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev",
+    "dev": "cross-env NODE_USE_SYSTEM_CA=1 next dev",
     "lint:check": "prettier --check .",
     "lint:fix": "prettier --write ."
   },
@@ -17,6 +17,7 @@
     "react-dom": "^19.2.5"
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "prettier": "^3.8.3"
   }
 }

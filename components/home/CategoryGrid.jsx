@@ -1,6 +1,6 @@
 // components/home/CategoryGrid.jsx
 import CategoryCard from "components/ui/CategoryCard";
-import { S } from "styles/theme";
+import { S, T } from "styles/theme";
 import { CATEGORIES } from "lib/categorias";
 
 export default function CategoryGrid() {
@@ -13,12 +13,7 @@ export default function CategoryGrid() {
         <div style={{ marginBottom: 28 }}>
           <h2
             className="bu-section-title"
-            style={{
-              fontFamily: S.serif,
-              fontSize: 32,
-              fontWeight: 700,
-              color: S.dark,
-            }}
+            style={{ ...T.titulo, fontSize: 32, color: S.dark }}
           >
             +Categorias
           </h2>

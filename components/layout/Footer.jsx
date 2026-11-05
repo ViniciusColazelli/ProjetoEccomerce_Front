@@ -1,14 +1,14 @@
 // components/layout/Footer.jsx
 import Link from "next/link";
 import Icon from "components/ui/Icon";
+import Logo from "components/ui/Logo";
+import ContatoLink from "components/ui/ContatoLink";
 import { S } from "styles/theme";
-import {
-  CONTATO,
-  WHATSAPP_URL,
-  INSTAGRAM_URL,
-  ENDERECO,
-  HORARIO,
-} from "lib/contato";
+import { CONTATO, ENDERECO, HORARIO, MAPS_EMBED_URL } from "lib/contato";
+import { LINKS } from "lib/navegacao";
+
+// O rodapé já é a seção de contato: não lista o link para ela mesma
+const LINKS_RODAPE = LINKS.filter((l) => l.href !== "#contato");
 
 const titulo = {
   fontSize: 12,
@@ -28,8 +28,6 @@ const item = {
   marginBottom: 12,
 };
 
-const externo = { target: "_blank", rel: "noopener noreferrer" };
-
 export default function Footer() {
   return (
     <footer id="contato" style={{ background: S.white, borderTop: S.line }}>
@@ -38,16 +36,7 @@ export default function Footer() {
         style={{ paddingTop: 56, paddingBottom: 48 }}
       >
         <div>
-          <img
-            src="/logo.png"
-            alt="Belíssima Uniformes"
-            style={{
-              height: 82,
-              width: "auto",
-              objectFit: "contain",
-              display: "block",
-            }}
-          />
+          <Logo height={82} />
           <p
             style={{
               fontSize: 14,
@@ -63,45 +52,40 @@ export default function Footer() {
 
         <div>
           <p style={titulo}>Navegação</p>
-          <Link href="/" className="bu-link-muted" style={item}>
-            Início
-          </Link>
-          <Link href="/#categorias" className="bu-link-muted" style={item}>
-            Categorias
-          </Link>
-          <Link href="/#sobre" className="bu-link-muted" style={item}>
-            Sobre
-          </Link>
+          {LINKS_RODAPE.map((l) => (
+            <Link
+              key={l.label}
+              href={l.href}
+              className="bu-link-muted"
+              style={item}
+            >
+              {l.label}
+            </Link>
+          ))}
         </div>
 
         <div>
           <p style={titulo}>Contato</p>
-          <a
-            href={WHATSAPP_URL}
-            {...externo}
+          <ContatoLink
+            rede="whatsapp"
+            color={S.primary}
             className="bu-link-muted"
             style={item}
-          >
-            <Icon name="whatsapp" size={16} color={S.primary} stroke={1.8} />
-            {CONTATO.celular}
-          </a>
+          />
           <span style={item}>
             <Icon name="phone" size={16} color={S.primary} stroke={1.8} />
             {CONTATO.telefone}
           </span>
-          <a
-            href={INSTAGRAM_URL}
-            {...externo}
+          <ContatoLink
+            rede="instagram"
+            color={S.primary}
             className="bu-link-muted"
             style={item}
-          >
-            <Icon name="instagram" size={16} color={S.primary} stroke={1.8} />@
-            {CONTATO.instagram}
-          </a>
+          />
         </div>
 
         <div>
-          <h3 style={titulo}>ONDE ESTAMOS</h3>
+          <p style={titulo}>Onde estamos</p>
           <p
             style={{
               ...item,
@@ -147,7 +131,7 @@ export default function Footer() {
             }}
           >
             <iframe
-              src="https://maps.google.com/maps?q=-23.672813,-46.480092&hl=pt-BR&z=17&output=embed"
+              src={MAPS_EMBED_URL}
               width="100%"
               height="100%"
               style={{ border: 0 }}
