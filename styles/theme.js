@@ -6,21 +6,17 @@ const border = "#e2e2e2";
 export const S = {
   // cores da marca (logo Belíssima Uniformes)
   primary: "#A52021",
-  primaryHover: "#861A1B",
   secondary: "#647C84",
   secondaryDark: "#46585E",
 
   // cores base
-  gold: "#A52021",
   dark: "#111111",
   muted: "#999999",
   soft: "#666666",
-  faint: "#bbbbbb",
   white: "#ffffff",
   border,
-  heroBg: "#EEF2F3",
   pageBg: "#FAFBFB",
-  hoverBg: "#f5f5f5",
+  imageBg: "#f2f2f2", // fundo das fotos enquanto carregam
   disabled: "#555555",
   danger: "#c0392b",
 
@@ -38,17 +34,20 @@ export const S = {
   shadow: {
     menu: "0 8px 24px rgba(0,0,0,0.10)",
     popup: "0 8px 32px rgba(0,0,0,0.12)",
-    lift: "0 8px 24px rgba(0,0,0,0.15)",
   },
 };
 
+// Base de todo título com a fonte serifada
+const titulo = { fontFamily: S.serif, fontWeight: 700 };
+
 // Estilos de texto reutilizáveis. Use com spread: {...T.eyebrow, marginBottom: 14}
 export const T = {
+  titulo,
   eyebrow: {
     fontSize: 11,
     letterSpacing: "0.22em",
     textTransform: "uppercase",
-    color: S.gold,
+    color: S.primary,
     fontWeight: 400,
     marginBottom: 6,
   },
@@ -58,16 +57,6 @@ export const T = {
     letterSpacing: "0.1em",
     textTransform: "uppercase",
   },
-  popupTitle: {
-    fontFamily: S.serif,
-    fontSize: 16,
-    fontWeight: 700,
-    marginBottom: 14,
-  },
-  cardTitle: {
-    fontFamily: S.serif,
-    fontSize: 18,
-    fontWeight: 700,
-    marginBottom: 20,
-  },
+  popupTitle: { ...titulo, fontSize: 16, marginBottom: 14 },
+  cardTitle: { ...titulo, fontSize: 18, marginBottom: 20 },
 };

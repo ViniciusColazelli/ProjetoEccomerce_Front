@@ -7,7 +7,7 @@ export default function CategoryCard({ cat }) {
     <div className="bu-cat-card" style={{ cursor: "pointer" }}>
       <div
         style={{
-          background: "#f2f2f2",
+          background: S.imageBg,
           aspectRatio: "4/5",
           borderRadius: S.radius.sm,
           overflow: "hidden",

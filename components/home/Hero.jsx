@@ -1,9 +1,8 @@
 // components/home/Hero.jsx
-import Link from "next/link";
 import Button from "components/ui/Button";
-import { S } from "styles/theme";
+import { S, T } from "styles/theme";
 import { CATEGORIES } from "lib/categorias";
-import { WHATSAPP_URL } from "lib/contato";
+import { WHATSAPP_URL, LINK_EXTERNO } from "lib/contato";
 
 const camisas = CATEGORIES[1];
 
@@ -30,9 +29,8 @@ export default function Hero() {
           <h1
             className="bu-hero-title"
             style={{
-              fontFamily: S.serif,
+              ...T.titulo,
               fontSize: 54,
-              fontWeight: 700,
               lineHeight: 1.1,
               color: S.dark,
               marginBottom: 18,
@@ -62,14 +60,9 @@ export default function Hero() {
             <Button href="/#categorias" style={{ padding: "13px 28px" }}>
               Ver coleção
             </Button>
-            <Link
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bu-text-link"
-            >
+            <a href={WHATSAPP_URL} {...LINK_EXTERNO} className="bu-text-link">
               ou fale com a gente no WhatsApp
-            </Link>
+            </a>
           </div>
         </div>
 
@@ -77,7 +70,7 @@ export default function Hero() {
           <div
             className="bu-hero-visual"
             style={{
-              background: "#f2f2f2",
+              background: S.imageBg,
               height: 440,
               borderRadius: S.radius.sm,
               overflow: "hidden",

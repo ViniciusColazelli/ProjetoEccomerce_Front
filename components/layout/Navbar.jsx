@@ -3,19 +3,14 @@
 import Link from "next/link";
 import NavBtn from "components/ui/NavBtn";
 import Icon from "components/ui/Icon";
+import Logo from "components/ui/Logo";
+import ContatoLink from "components/ui/ContatoLink";
 import UserMenu from "./UserMenu";
 import { S } from "styles/theme";
 import { useAuthContext } from "context/AuthContext";
-import { CONTATO, WHATSAPP_URL, INSTAGRAM_URL } from "lib/contato";
+import { LINKS } from "lib/navegacao";
 
-const LINKS = [
-  { label: "Início", href: "/" },
-  { label: "Categorias", href: "/#categorias" },
-  { label: "Sobre", href: "/#sobre" },
-  { label: "Contato", href: "#contato" },
-];
-
-const externo = { target: "_blank", rel: "noopener noreferrer" };
+const linkTopo = { display: "flex", alignItems: "center", gap: 6 };
 
 function TopBar() {
   return (
@@ -34,22 +29,18 @@ function TopBar() {
           Roupas com qualidade
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <a
-            href={WHATSAPP_URL}
-            {...externo}
-            style={{ display: "flex", alignItems: "center", gap: 6 }}
-          >
-            <Icon name="whatsapp" size={14} color={S.white} stroke={1.8} />
-            {CONTATO.celular}
-          </a>
-          <a
-            href={INSTAGRAM_URL}
-            {...externo}
-            style={{ display: "flex", alignItems: "center", gap: 6 }}
-          >
-            <Icon name="instagram" size={14} color={S.white} stroke={1.8} />@
-            {CONTATO.instagram}
-          </a>
+          <ContatoLink
+            rede="whatsapp"
+            iconSize={14}
+            color={S.white}
+            style={linkTopo}
+          />
+          <ContatoLink
+            rede="instagram"
+            iconSize={14}
+            color={S.white}
+            style={linkTopo}
+          />
         </div>
       </div>
     </div>
@@ -88,16 +79,7 @@ export default function Navbar({ onSearch, onAuth, onCart }) {
             aria-label="Belíssima Uniformes — início"
             style={{ display: "flex", alignItems: "center" }}
           >
-            <img
-              src="/logo.png"
-              alt="Belíssima Uniformes"
-              style={{
-                height: 85,
-                width: "auto",
-                objectFit: "contain",
-                display: "block",
-              }}
-            />
+            <Logo height={85} />
           </Link>
 
           <div
