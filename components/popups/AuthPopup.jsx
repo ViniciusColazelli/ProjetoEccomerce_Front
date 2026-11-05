@@ -1,5 +1,5 @@
 // components/popups/AuthPopup.jsx
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Popup from "./Popup";
 import Input from "components/ui/Input";
 import Alert from "components/ui/Alert";
@@ -23,6 +23,10 @@ export default function AuthPopup({ onClose }) {
   const cadastrar = useAsyncAction(registrarCliente);
   const acao = tab === "login" ? entrar : cadastrar;
 
+  // Se o popup fechar antes dos 1,5 s da tela de sucesso, o timer não roda mais
+  const timer = useRef(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
   const set = (campo) => (e) =>
     setCampos((c) => ({ ...c, [campo]: e.target.value }));
 
@@ -39,7 +43,10 @@ export default function AuthPopup({ onClose }) {
     const ok = await acao.run(dados);
     if (ok) {
       // login: fecha o popup; cadastro: volta para a aba de login
-      setTimeout(tab === "login" ? onClose : () => trocarAba("login"), 1500);
+      timer.current = setTimeout(
+        tab === "login" ? onClose : () => trocarAba("login"),
+        1500,
+      );
     }
   }
 
@@ -139,28 +146,6 @@ export default function AuthPopup({ onClose }) {
               : "Criar conta"}
         </Button>
       </form>
-
-      {tab === "login" && (
-        <p
-          style={{
-            fontSize: 12,
-            color: S.muted,
-            textAlign: "center",
-            marginTop: 12,
-          }}
-        >
-          Esqueceu a senha?{" "}
-          <span
-            style={{
-              color: S.dark,
-              textDecoration: "underline",
-              cursor: "pointer",
-            }}
-          >
-            Recuperar
-          </span>
-        </p>
-      )}
     </Popup>
   );
 }

@@ -1,17 +1,13 @@
 // components/ui/NavBtn.jsx
-import { useState } from "react";
+// O fundo e o hover ficam no globals.css (.bu-nav-btn): estilo inline venceria o :hover
 import { S } from "styles/theme";
 
 export default function NavBtn({ onClick, badge, children }) {
-  const [hov, setHov] = useState(false);
-
   return (
     <button
       onClick={onClick}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
+      className="bu-nav-btn"
       style={{
-        background: hov ? S.hoverBg : S.white,
         border: S.line,
         borderRadius: S.radius.md,
         padding: 9,
@@ -20,7 +16,6 @@ export default function NavBtn({ onClick, badge, children }) {
         justifyContent: "center",
         cursor: "pointer",
         position: "relative",
-        transition: "background 0.15s",
       }}
     >
       {children}
