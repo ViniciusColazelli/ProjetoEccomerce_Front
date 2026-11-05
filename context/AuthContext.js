@@ -8,6 +8,13 @@ const AuthContext = createContext(null);
 // Checagem que não pode disparar "sessão expirada": visitante anônimo recebe 401
 const CHECAGEM_SILENCIOSA = { ignorarSessaoExpirada: true };
 
+// Só o que a Navbar e o perfil usam do ResponseClienteProfile
+const dadosDoUsuario = (perfil) => ({
+  nome: perfil.nome,
+  email: perfil.email,
+  role: perfil.role,
+});
+
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
   const [pronto, setPronto] = useState(false); // já perguntou à API se há sessão?
@@ -19,12 +26,7 @@ export function AuthProvider({ children }) {
 
     getPerfilCliente(CHECAGEM_SILENCIOSA)
       .then((perfil) => {
-        if (!cancelado)
-          setUsuario({
-            nome: perfil.nome,
-            email: perfil.email,
-            role: perfil.role,
-          });
+        if (!cancelado) setUsuario(dadosDoUsuario(perfil));
       })
       .catch(() => {
         if (!cancelado) setUsuario(null); // sem sessão válida
@@ -54,14 +56,10 @@ export function AuthProvider({ children }) {
   async function login(credenciais) {
     await loginCliente(credenciais);
     const perfil = await getPerfilCliente(CHECAGEM_SILENCIOSA);
-    setUsuario({
-      nome: perfil.nome,
-      email: perfil.email,
-      role: perfil.role,
-    });
+    setUsuario(dadosDoUsuario(perfil));
   }
 
-  // Mantém o nome da Navbar em dia após editar o perfil
+  // Mantém a Navbar e o perfil em dia após editar os dados
   function atualizarUsuario(parcial) {
     setUsuario((atual) => ({ ...atual, ...parcial }));
   }
