@@ -2,6 +2,7 @@
 // Faixa de contato + barra principal (logo, links e ações), fixas no topo
 import Link from "next/link";
 import NavBtn from "components/ui/NavBtn";
+import NavLink from "components/ui/NavLink";
 import Icon from "components/ui/Icon";
 import Logo from "components/ui/Logo";
 import ContatoLink from "components/ui/ContatoLink";
@@ -91,9 +92,9 @@ export default function Navbar() {
             style={{ display: "flex", alignItems: "center", gap: 32 }}
           >
             {LINKS.map((l) => (
-              <Link key={l.label} href={l.href} className="bu-nav-link">
+              <NavLink key={l.label} href={l.href} className="bu-nav-link">
                 {l.label}
-              </Link>
+              </NavLink>
             ))}
           </div>
 

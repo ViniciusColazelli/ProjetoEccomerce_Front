@@ -1,7 +1,7 @@
 // components/popups/MenuPopup.jsx
 // Links da Navbar em telas pequenas (a barra de links some abaixo de 960px)
-import Link from "next/link";
 import Popup from "./Popup";
+import NavLink from "components/ui/NavLink";
 import { S, T } from "styles/theme";
 import { LINKS } from "lib/navegacao";
 
@@ -11,7 +11,7 @@ export default function MenuPopup({ onClose }) {
       <p style={{ ...T.eyebrow, marginBottom: 10 }}>Menu</p>
       <nav style={{ display: "flex", flexDirection: "column" }}>
         {LINKS.map((l) => (
-          <Link
+          <NavLink
             key={l.label}
             href={l.href}
             onClick={onClose}
@@ -24,7 +24,7 @@ export default function MenuPopup({ onClose }) {
             }}
           >
             {l.label}
-          </Link>
+          </NavLink>
         ))}
       </nav>
     </Popup>
