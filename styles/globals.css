@@ -171,6 +171,13 @@ textarea:focus {
 .bu-table tbody tr:hover {
   background: #fafafa;
 }
+/* Linha que abre um detalhe ao clicar */
+.bu-table tbody tr.bu-tr-link {
+  cursor: pointer;
+}
+.bu-table tbody tr.bu-tr-link:hover td:first-child a {
+  color: #a52021;
+}
 .bu-table .bu-num {
   text-align: right;
   white-space: nowrap;

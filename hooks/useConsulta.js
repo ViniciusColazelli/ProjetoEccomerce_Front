@@ -1,5 +1,6 @@
 // hooks/useConsulta.js
-// Carrega dados da API no navegador: { dados, carregando, erro, recarregar }.
+// Carrega dados da API no navegador: { dados, carregando, erro, recarregar, setDados }.
+// setDados troca os dados sem nova requisição, quando a API já devolve o registro atualizado.
 // getServerSideProps não serve aqui: o /backend (rewrite + cookie) só existe no browser.
 
 import { useCallback, useEffect, useState } from "react";
@@ -36,5 +37,5 @@ export function useConsulta(fn, deps = []) {
 
   const recarregar = useCallback(() => setVersao((v) => v + 1), []);
 
-  return { dados, carregando, erro, recarregar };
+  return { dados, carregando, erro, recarregar, setDados };
 }

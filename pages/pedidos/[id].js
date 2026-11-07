@@ -11,6 +11,7 @@ import { whatsappComTexto, LINK_EXTERNO, ENDERECO, HORARIO } from "lib/contato";
 import { useConsulta } from "hooks/useConsulta";
 import RotaProtegida from "components/layout/RotaProtegida";
 import ItensPedido from "components/pedidos/ItensPedido";
+import AndamentoPedido from "components/pedidos/AndamentoPedido";
 import StatusBadge from "components/ui/StatusBadge";
 import Button from "components/ui/Button";
 import Confirmar from "components/ui/Confirmar";
@@ -58,6 +59,7 @@ function DetalhePedido({ id, novo }) {
     carregando,
     erro,
     recarregar,
+    setDados,
   } = useConsulta(
     () =>
       obterMeuPedido(id).catch((e) => {
@@ -136,6 +138,8 @@ function DetalhePedido({ id, novo }) {
           marginBottom: 24,
         }}
       >
+        <AndamentoPedido pedido={pedido} />
+
         {aguardando && (
           <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>
             Combine o pagamento pelo WhatsApp
@@ -145,11 +149,27 @@ function DetalhePedido({ id, novo }) {
           {MENSAGEM_CLIENTE[pedido.status]}
         </p>
         {pedido.status === "ProntoParaRetirada" && (
-          <p style={{ fontSize: 14, color: S.soft, marginTop: 8 }}>
-            {ENDERECO}
-            <br />
-            {HORARIO}
-          </p>
+          <div
+            style={{
+              display: "grid",
+              gap: 8,
+              marginTop: 14,
+              padding: "14px 16px",
+              background: S.pageBg,
+              borderRadius: S.radius.md,
+              fontSize: 14,
+              color: S.soft,
+            }}
+          >
+            <p style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <Icon name="mapPin" size={17} color={S.primary} />
+              {ENDERECO}
+            </p>
+            <p style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <Icon name="clock" size={17} color={S.primary} />
+              {HORARIO}
+            </p>
+          </div>
         )}
         {aguardando && (
           <div
@@ -187,8 +207,8 @@ function DetalhePedido({ id, novo }) {
           titulo="Cancelar pedido?"
           textoConfirmar="Sim, cancelar"
           onConfirmar={async () => {
-            await cancelarMeuPedido(id);
-            recarregar();
+            // A API devolve o pedido já cancelado: não precisa buscar de novo
+            setDados(await cancelarMeuPedido(id));
           }}
           onClose={() => setConfirmando(false)}
         >
