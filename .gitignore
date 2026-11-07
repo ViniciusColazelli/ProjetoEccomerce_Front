@@ -1,6 +1,8 @@
 node_modules
 .next
 .env.development
+# padrão do Next para segredos locais (.env.local, .env.production.local...)
+.env*.local
 
 # Configurações locais (Claude Code, launch de cada máquina)
 .claude/

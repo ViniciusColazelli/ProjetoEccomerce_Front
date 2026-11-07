@@ -1,14 +1,13 @@
 // pages/admin/pedidos/index.js
 // Todos os pedidos: filtro por status, cliente (nome ou e-mail) e período.
 // Filtros na URL (?status=&cliente=&de=&ate=&pagina=), para voltar do detalhe no mesmo lugar.
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { listarPedidosAdmin } from "lib/pedidosAdmin";
 import { formatarData, formatarPreco } from "lib/formatar";
 import { LISTA_STATUS, rotuloStatus } from "lib/statusPedido";
 import { useConsulta } from "hooks/useConsulta";
-import { useDebounce } from "hooks/useDebounce";
+import { useCampoNaUrl } from "hooks/useCampoNaUrl";
 import { useFiltrosUrl } from "hooks/useFiltrosUrl";
 import AdminLayout from "components/admin/AdminLayout";
 import StatusBadge from "components/ui/StatusBadge";
@@ -46,23 +45,12 @@ function ListaPedidos() {
   const pagina = Math.max(1, parseInt(filtros.pagina, 10) || 1);
 
   // Cliente: só vai para a URL (e para a API) depois que para de digitar
-  const [busca, setBusca] = useState(filtros.cliente);
-  const buscaDigitada = useDebounce(busca.trim());
-  const enviada = useRef(filtros.cliente);
-  useEffect(() => {
-    if (buscaDigitada === filtros.cliente) return;
-    enviada.current = buscaDigitada;
+  const [busca, setBusca] = useCampoNaUrl(filtros.cliente, (valor) =>
     atualizar(
-      { cliente: buscaDigitada, pagina: 1 },
-      { substituir: !!filtros.cliente && !!buscaDigitada },
-    );
-  }, [buscaDigitada]);
-  useEffect(() => {
-    if (filtros.cliente !== enviada.current) {
-      enviada.current = filtros.cliente;
-      setBusca(filtros.cliente);
-    }
-  }, [filtros.cliente]);
+      { cliente: valor, pagina: 1 },
+      { substituir: !!filtros.cliente && !!valor },
+    ),
+  );
 
   const { dados, carregando, erro, recarregar } = useConsulta(
     () =>
