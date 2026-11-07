@@ -1,18 +1,22 @@
 // pages/admin/pedidos/index.js
-// Todos os pedidos: filtro por status, cliente e período
-import { useEffect, useState } from "react";
+// Todos os pedidos: filtro por status, cliente (nome ou e-mail) e período.
+// Filtros na URL (?status=&cliente=&de=&ate=&pagina=), para voltar do detalhe no mesmo lugar.
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import { listarPedidosAdmin } from "lib/pedidosAdmin";
 import { formatarData, formatarPreco } from "lib/formatar";
 import { LISTA_STATUS, rotuloStatus } from "lib/statusPedido";
 import { useConsulta } from "hooks/useConsulta";
 import { useDebounce } from "hooks/useDebounce";
+import { useFiltrosUrl } from "hooks/useFiltrosUrl";
 import AdminLayout from "components/admin/AdminLayout";
 import StatusBadge from "components/ui/StatusBadge";
 import Paginacao from "components/ui/Paginacao";
 import Campo from "components/ui/Campo";
 import Input from "components/ui/Input";
 import Select from "components/ui/Select";
+import Button from "components/ui/Button";
 import Alert from "components/ui/Alert";
 import Loading from "components/ui/Loading";
 import Vazio from "components/ui/Vazio";
@@ -20,41 +24,76 @@ import { S } from "styles/theme";
 
 const TAMANHO_PAGINA = 20;
 
+const PADROES = { status: "", cliente: "", de: "", ate: "", pagina: "1" };
+
 const OPCOES_STATUS = [
   { valor: "", rotulo: "Todos" },
   ...LISTA_STATUS.map((s) => ({ valor: s, rotulo: rotuloStatus(s) })),
 ];
 
 export default function AdminPedidos() {
+  const router = useRouter();
   return (
     <AdminLayout titulo="Pedidos">
-      <ListaPedidos />
+      {router.isReady ? <ListaPedidos /> : <Loading />}
     </AdminLayout>
   );
 }
 
 function ListaPedidos() {
-  const [status, setStatus] = useState("");
-  const [busca, setBusca] = useState("");
-  const [de, setDe] = useState("");
-  const [ate, setAte] = useState("");
-  const [pagina, setPagina] = useState(1);
-  const cliente = useDebounce(busca.trim());
+  const router = useRouter();
+  const [filtros, atualizar] = useFiltrosUrl(PADROES);
+  const pagina = Math.max(1, parseInt(filtros.pagina, 10) || 1);
 
-  useEffect(() => setPagina(1), [status, cliente, de, ate]);
+  // Cliente: só vai para a URL (e para a API) depois que para de digitar
+  const [busca, setBusca] = useState(filtros.cliente);
+  const buscaDigitada = useDebounce(busca.trim());
+  const enviada = useRef(filtros.cliente);
+  useEffect(() => {
+    if (buscaDigitada === filtros.cliente) return;
+    enviada.current = buscaDigitada;
+    atualizar(
+      { cliente: buscaDigitada, pagina: 1 },
+      { substituir: !!filtros.cliente && !!buscaDigitada },
+    );
+  }, [buscaDigitada]);
+  useEffect(() => {
+    if (filtros.cliente !== enviada.current) {
+      enviada.current = filtros.cliente;
+      setBusca(filtros.cliente);
+    }
+  }, [filtros.cliente]);
 
-  const { dados, carregando, erro } = useConsulta(
+  const { dados, carregando, erro, recarregar } = useConsulta(
     () =>
       listarPedidosAdmin({
         pagina,
         tamanhoPagina: TAMANHO_PAGINA,
-        status: status || undefined,
-        cliente: cliente || undefined,
-        de: de || undefined,
-        ate: ate || undefined,
+        status: filtros.status || undefined,
+        cliente: filtros.cliente || undefined,
+        de: filtros.de || undefined,
+        ate: filtros.ate || undefined,
       }),
-    [pagina, status, cliente, de, ate],
+    [pagina, filtros.status, filtros.cliente, filtros.de, filtros.ate],
   );
+
+  const filtrando = !!(
+    filtros.status ||
+    filtros.cliente ||
+    filtros.de ||
+    filtros.ate
+  );
+
+  function limparFiltros() {
+    setBusca("");
+    atualizar({ ...PADROES });
+  }
+
+  // A linha toda abre o pedido; o link do nº continua para teclado e nova aba
+  function abrirPedido(e, id) {
+    if (e.target.closest("a")) return;
+    router.push(`/admin/pedidos/${id}`);
+  }
 
   return (
     <>
@@ -62,8 +101,8 @@ function ListaPedidos() {
         <Campo label="Status">
           <Select
             opcoes={OPCOES_STATUS}
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            value={filtros.status}
+            onChange={(e) => atualizar({ status: e.target.value, pagina: 1 })}
             style={{ marginBottom: 0 }}
           />
         </Campo>
@@ -80,29 +119,58 @@ function ListaPedidos() {
         <Campo label="De">
           <Input
             type="date"
-            value={de}
-            max={ate || undefined}
-            onChange={(e) => setDe(e.target.value)}
+            value={filtros.de}
+            max={filtros.ate || undefined}
+            onChange={(e) => atualizar({ de: e.target.value, pagina: 1 })}
             style={{ marginBottom: 0 }}
           />
         </Campo>
         <Campo label="Até">
           <Input
             type="date"
-            value={ate}
-            min={de || undefined}
-            onChange={(e) => setAte(e.target.value)}
+            value={filtros.ate}
+            min={filtros.de || undefined}
+            onChange={(e) => atualizar({ ate: e.target.value, pagina: 1 })}
             style={{ marginBottom: 0 }}
           />
         </Campo>
       </div>
 
-      <Alert>{erro}</Alert>
+      {filtrando && (
+        <button
+          type="button"
+          className="bu-text-link"
+          onClick={limparFiltros}
+          style={{
+            background: "none",
+            border: "none",
+            padding: 0,
+            cursor: "pointer",
+            fontFamily: S.sans,
+            marginBottom: 16,
+          }}
+        >
+          Limpar filtros
+        </button>
+      )}
 
       {carregando && !dados ? (
         <Loading />
-      ) : !dados || dados.pedidos.length === 0 ? (
-        <Vazio>Nenhum pedido encontrado.</Vazio>
+      ) : erro ? (
+        <>
+          <Alert>Não foi possível carregar os pedidos: {erro}</Alert>
+          <Button variant="outline" onClick={recarregar}>
+            Tentar de novo
+          </Button>
+        </>
+      ) : dados.pedidos.length === 0 ? (
+        <Vazio>
+          {dados.total > 0
+            ? "Essa página não existe."
+            : filtrando
+              ? "Nenhum pedido encontrado com esses filtros."
+              : "Nenhum pedido ainda."}
+        </Vazio>
       ) : (
         <>
           <p style={{ fontSize: 13, color: S.muted, marginBottom: 10 }}>
@@ -121,13 +189,24 @@ function ListaPedidos() {
                   <th>Status</th>
                   <th className="bu-num">Peças</th>
                   <th className="bu-num">Total</th>
-                  <th />
                 </tr>
               </thead>
               <tbody>
                 {dados.pedidos.map((p) => (
-                  <tr key={p.id}>
-                    <td style={{ fontWeight: 600 }}>#{p.id}</td>
+                  <tr
+                    key={p.id}
+                    className="bu-tr-link"
+                    onClick={(e) => abrirPedido(e, p.id)}
+                  >
+                    <td>
+                      <Link
+                        href={`/admin/pedidos/${p.id}`}
+                        style={{ fontWeight: 600 }}
+                        aria-label={`Abrir pedido ${p.id}`}
+                      >
+                        #{p.id}
+                      </Link>
+                    </td>
                     <td>
                       <p>{p.cliente.nome}</p>
                       <p style={{ fontSize: 12, color: S.muted }}>
@@ -142,14 +221,6 @@ function ListaPedidos() {
                     </td>
                     <td className="bu-num">{p.quantidadePecas}</td>
                     <td className="bu-num">{formatarPreco(p.total)}</td>
-                    <td className="bu-num">
-                      <Link
-                        href={`/admin/pedidos/${p.id}`}
-                        className="bu-text-link"
-                      >
-                        Abrir
-                      </Link>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -159,7 +230,7 @@ function ListaPedidos() {
             pagina={pagina}
             tamanhoPagina={TAMANHO_PAGINA}
             total={dados.total}
-            onChange={setPagina}
+            onChange={(p) => atualizar({ pagina: p })}
           />
         </>
       )}
