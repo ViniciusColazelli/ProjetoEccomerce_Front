@@ -1,13 +1,12 @@
 // pages/admin/estoque/movimentacoes.js
 // Histórico de entradas e saídas. Filtros na URL, para outras telas linkarem direto:
 // ?produtoId=&varianteId=&pedidoId=&tipo=Entrada|Saida&de=AAAA-MM-DD&ate=AAAA-MM-DD&pagina=
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { listarEstoque, listarMovimentacoes } from "lib/estoqueAdmin";
 import { formatarData, descreverVariante } from "lib/formatar";
 import { useConsulta } from "hooks/useConsulta";
-import { useDebounce } from "hooks/useDebounce";
+import { useCampoNaUrl } from "hooks/useCampoNaUrl";
 import { useFiltrosUrl } from "hooks/useFiltrosUrl";
 import { useOpcoesProduto } from "hooks/useProdutosAdmin";
 import AdminLayout from "components/admin/AdminLayout";
@@ -79,20 +78,11 @@ function Movimentacoes() {
   const opcoesVariante = useOpcoesVariante(filtros.produtoId);
 
   // Nº do pedido: aplica depois que para de digitar
-  const [pedido, setPedido] = useState(filtros.pedidoId);
-  const pedidoDigitado = useDebounce(pedido.replace(/\D/g, ""));
-  const enviado = useRef(filtros.pedidoId);
-  useEffect(() => {
-    if (pedidoDigitado === filtros.pedidoId) return;
-    enviado.current = pedidoDigitado;
-    atualizar({ pedidoId: pedidoDigitado, pagina: 1 }, { substituir: true });
-  }, [pedidoDigitado]);
-  useEffect(() => {
-    if (filtros.pedidoId !== enviado.current) {
-      enviado.current = filtros.pedidoId;
-      setPedido(filtros.pedidoId);
-    }
-  }, [filtros.pedidoId]);
+  const [pedido, setPedido] = useCampoNaUrl(
+    filtros.pedidoId,
+    (valor) => atualizar({ pedidoId: valor, pagina: 1 }, { substituir: true }),
+    (texto) => texto.replace(/\D/g, ""),
+  );
 
   const { dados, carregando, erro, recarregar } = useConsulta(
     () =>

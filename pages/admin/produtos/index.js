@@ -1,13 +1,13 @@
 // pages/admin/produtos/index.js
 // Catálogo completo (ativos e inativos): busca, filtro de situação, paginação e ativar/desativar.
 // Os filtros ficam na URL (?nome=&ativo=&pagina=) para sobreviver à ida e volta da edição.
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { listarProdutosAdmin, alterarStatusProduto } from "lib/produtosAdmin";
 import { formatarPreco } from "lib/formatar";
 import { useConsulta } from "hooks/useConsulta";
-import { useDebounce } from "hooks/useDebounce";
+import { useCampoNaUrl } from "hooks/useCampoNaUrl";
 import AdminLayout from "components/admin/AdminLayout";
 import { BadgeAtivo } from "components/ui/StatusBadge";
 import Paginacao from "components/ui/Paginacao";
@@ -64,25 +64,9 @@ function ListaProdutos() {
   }
 
   // Busca: digitar atualiza a URL depois da pausa (mesma lógica da vitrine)
-  const [busca, setBusca] = useState(nome);
-  const buscaDigitada = useDebounce(busca.trim());
-  const enviada = useRef(nome);
-
-  useEffect(() => {
-    if (buscaDigitada === nome) return;
-    enviada.current = buscaDigitada;
-    navegar(
-      { nome: buscaDigitada, pagina: 1 },
-      { substituir: !!nome && !!buscaDigitada },
-    );
-  }, [buscaDigitada]);
-
-  useEffect(() => {
-    if (nome !== enviada.current) {
-      enviada.current = nome;
-      setBusca(nome);
-    }
-  }, [nome]);
+  const [busca, setBusca] = useCampoNaUrl(nome, (valor) =>
+    navegar({ nome: valor, pagina: 1 }, { substituir: !!nome && !!valor }),
+  );
 
   const { dados, carregando, erro, recarregar } = useConsulta(
     () =>

@@ -1,12 +1,11 @@
 // pages/produtos/index.js
 // Vitrine. Os filtros moram na URL (?nome=&pagina=&ordenarPor=&direcao=), então dá para
 // compartilhar o link, voltar no navegador e chegar já filtrado pela busca ou pelas categorias.
-import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { listarProdutos } from "lib/produtos";
 import { useConsulta } from "hooks/useConsulta";
-import { useDebounce } from "hooks/useDebounce";
+import { useCampoNaUrl } from "hooks/useCampoNaUrl";
 import CabecalhoPagina from "components/ui/CabecalhoPagina";
 import ProdutoCard from "components/ui/ProdutoCard";
 import Paginacao from "components/ui/Paginacao";
@@ -86,28 +85,10 @@ function Vitrine() {
   }
 
   // ── Campo de busca ────────────────────────────────────────────
-  const [busca, setBusca] = useState(nome);
-  const buscaDigitada = useDebounce(busca.trim());
-  const enviada = useRef(nome); // último nome que este campo mandou para a URL
-
   // Parou de digitar: leva a busca para a URL, voltando para a página 1
-  useEffect(() => {
-    if (buscaDigitada === nome) return;
-    enviada.current = buscaDigitada;
-    navegar(
-      { nome: buscaDigitada, pagina: 1 },
-      { substituir: !!nome && !!buscaDigitada },
-    );
-  }, [buscaDigitada]);
-
-  // A URL mudou por fora (busca da Navbar, categoria, voltar do navegador): atualiza o campo.
-  // Se fomos nós que mandamos, não mexe: o usuário pode ter continuado digitando.
-  useEffect(() => {
-    if (nome !== enviada.current) {
-      enviada.current = nome;
-      setBusca(nome);
-    }
-  }, [nome]);
+  const [busca, setBusca] = useCampoNaUrl(nome, (valor) =>
+    navegar({ nome: valor, pagina: 1 }, { substituir: !!nome && !!valor }),
+  );
 
   // ── Dados ─────────────────────────────────────────────────────
   const { dados, carregando, erro, recarregar } = useConsulta(
