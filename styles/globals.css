@@ -259,6 +259,22 @@ textarea:focus {
   text-decoration-color: #a52021;
 }
 
+/* Linha de resultado do popup de busca */
+.bu-busca-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 8px;
+  margin: 0 -8px;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.bu-busca-item:hover,
+.bu-busca-item:focus-visible {
+  background: #f5f5f5;
+}
+
 .bu-icon-btn {
   border: none;
   background: none;
