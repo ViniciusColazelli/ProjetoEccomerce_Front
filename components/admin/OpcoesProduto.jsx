@@ -16,7 +16,6 @@ import Input from "components/ui/Input";
 import Select from "components/ui/Select";
 import Button from "components/ui/Button";
 import Modal from "components/ui/Modal";
-import Confirmar from "components/ui/Confirmar";
 import Alert from "components/ui/Alert";
 import Icon from "components/ui/Icon";
 import { BadgeAtivo } from "components/ui/StatusBadge";
@@ -174,6 +173,73 @@ function EditarOpcao({ produtoId, opcao, onClose, onSalva }) {
   );
 }
 
+// Remover só funciona em opção nunca usada. Se a API responder 409 (em uso),
+// o mesmo modal passa a oferecer desativar, que tira da loja sem apagar o histórico.
+function RemoverOpcao({ produtoId, opcao, onClose, onMudou }) {
+  const [emUso, setEmUso] = useState(false);
+  const [ocupado, setOcupado] = useState(false);
+  const [erro, setErro] = useState(null);
+
+  async function executar(acao) {
+    setOcupado(true);
+    setErro(null);
+    try {
+      await acao();
+      onMudou();
+      onClose();
+    } catch (e) {
+      if (e.status === 409 && !emUso) setEmUso(true);
+      else setErro(e.message);
+      setOcupado(false);
+    }
+  }
+
+  const remover = () => executar(() => removerOpcao(produtoId, opcao.id));
+  const desativar = () =>
+    executar(() => alterarStatusOpcao(produtoId, opcao.id, { ativo: false }));
+
+  return (
+    <Modal
+      titulo={
+        emUso ? `"${opcao.valor}" está em uso` : `Remover "${opcao.valor}"?`
+      }
+      onClose={() => !ocupado && onClose()}
+    >
+      <p
+        style={{
+          fontSize: 14,
+          color: S.soft,
+          lineHeight: 1.6,
+          marginBottom: 20,
+        }}
+      >
+        {!emUso
+          ? "A opção é apagada de vez. Só dá para remover opções que nunca foram usadas em variantes ou pedidos."
+          : opcao.ativo
+            ? "Ela já foi usada em variantes ou pedidos, então não dá para remover. Desative a opção: ela some da loja e não entra em variantes novas, mas o histórico continua."
+            : "Ela já foi usada em variantes ou pedidos, então não dá para remover. Ela já está desativada e não aparece na loja."}
+      </p>
+      <Alert>{erro}</Alert>
+      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+        <Button variant="outline" onClick={onClose} disabled={ocupado}>
+          {emUso && !opcao.ativo ? "Fechar" : "Voltar"}
+        </Button>
+        {!emUso ? (
+          <Button loading={ocupado} onClick={remover}>
+            {ocupado ? "Removendo..." : "Remover"}
+          </Button>
+        ) : (
+          opcao.ativo && (
+            <Button loading={ocupado} onClick={desativar}>
+              {ocupado ? "Desativando..." : "Desativar"}
+            </Button>
+          )
+        )}
+      </div>
+    </Modal>
+  );
+}
+
 export default function OpcoesProduto({ produto, onMudou }) {
   const [editando, setEditando] = useState(null);
   const [removendo, setRemovendo] = useState(null);
@@ -296,18 +362,12 @@ export default function OpcoesProduto({ produto, onMudou }) {
       )}
 
       {removendo && (
-        <Confirmar
-          titulo={`Remover "${removendo.valor}"?`}
-          textoConfirmar="Remover"
-          onConfirmar={async () => {
-            await removerOpcao(produto.id, removendo.id);
-            onMudou();
-          }}
+        <RemoverOpcao
+          produtoId={produto.id}
+          opcao={removendo}
           onClose={() => setRemovendo(null)}
-        >
-          Só dá para remover opções que nunca foram usadas em variantes ou
-          pedidos. Se já foi usada, desative em vez de remover.
-        </Confirmar>
+          onMudou={onMudou}
+        />
       )}
     </Card>
   );
