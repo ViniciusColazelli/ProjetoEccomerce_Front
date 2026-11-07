@@ -1,6 +1,6 @@
 // components/ui/Quantidade.jsx
 // Seletor − 1 + (de `min` a `max`). O número também pode ser digitado.
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { S } from "styles/theme";
 import Icon from "./Icon";
 
@@ -36,15 +36,15 @@ export default function Quantidade({
   max = 999,
   disabled,
 }) {
-  const [texto, setTexto] = useState(String(valor));
-
-  // Mantém o campo em dia quando o valor muda por fora (botões, carrinho)
-  useEffect(() => setTexto(String(valor)), [valor]);
+  // Texto só existe enquanto o usuário digita; fora disso o campo mostra o `valor` de fora
+  // (botões, carrinho), sem precisar copiar o valor num estado e sincronizar depois
+  const [texto, setTexto] = useState(null);
 
   function confirmar() {
+    if (texto === null) return;
     const n = parseInt(texto, 10);
     const novo = Number.isNaN(n) ? valor : limitar(n, min, max);
-    setTexto(String(novo));
+    setTexto(null);
     if (novo !== valor) onChange(novo);
   }
 
@@ -69,7 +69,7 @@ export default function Quantidade({
       <input
         aria-label="Quantidade"
         inputMode="numeric"
-        value={texto}
+        value={texto ?? String(valor)}
         disabled={disabled}
         onChange={(e) => setTexto(e.target.value.replace(/\D/g, ""))}
         onBlur={confirmar}

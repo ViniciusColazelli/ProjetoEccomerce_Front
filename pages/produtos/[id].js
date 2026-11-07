@@ -1,6 +1,6 @@
 // pages/produtos/[id].js
 // Detalhe do produto: escolhe tamanho, cor, personalizações e quantidade, e põe no carrinho
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
@@ -97,9 +97,10 @@ function ProdutoDetalhe({ produto }) {
   const [corId, setCorId] = useState(cores.length === 1 ? cores[0].id : null);
   const [extras, setExtras] = useState([]); // ids das personalizações
   const [quantidade, setQuantidade] = useState(1);
-  const [aviso, setAviso] = useState(null);
-
-  useEffect(() => setAviso(null), [tamanhoId, corId, extras, quantidade]);
+  // O aviso vale para a escolha em que apareceu: mudou tamanho, cor, extras ou quantidade, ele some
+  const escolha = JSON.stringify([tamanhoId, corId, extras, quantidade]);
+  const [aviso, setAviso] = useState(null); // { escolha, texto }
+  const avisoAtual = aviso?.escolha === escolha ? aviso.texto : null;
 
   // Só para riscar a opção: continua clicável, e a combinação escolhida mostra "Esgotado"
   const tamanhoTemEstoque = (t) =>
@@ -157,9 +158,10 @@ function ProdutoDetalhe({ produto }) {
     });
 
     if (!ok)
-      return setAviso(
-        `Seu carrinho já está no limite de ${MAXIMO_ITENS} itens diferentes.`,
-      );
+      return setAviso({
+        escolha,
+        texto: `Seu carrinho já está no limite de ${MAXIMO_ITENS} itens diferentes.`,
+      });
     setQuantidade(1);
     abrir("cart");
   }
@@ -331,7 +333,7 @@ function ProdutoDetalhe({ produto }) {
                   Esgotado nessa combinação. Escolha outro tamanho ou cor.
                 </Alert>
               )}
-              <Alert>{aviso}</Alert>
+              <Alert>{avisoAtual}</Alert>
 
               <Button
                 full

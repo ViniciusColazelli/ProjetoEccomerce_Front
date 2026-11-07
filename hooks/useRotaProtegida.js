@@ -14,7 +14,7 @@ export function useRotaProtegida({ admin = false } = {}) {
 
   useEffect(() => {
     if (pronto && !permitido) router.replace("/");
-  }, [pronto, permitido]);
+  }, [pronto, permitido, router]);
 
   return { usuario, liberado: pronto && permitido };
 }

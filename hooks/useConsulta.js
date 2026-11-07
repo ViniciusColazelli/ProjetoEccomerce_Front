@@ -6,36 +6,55 @@
 import { useCallback, useEffect, useState } from "react";
 
 export function useConsulta(fn, deps = []) {
-  const [dados, setDados] = useState(null);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState(null);
   const [versao, setVersao] = useState(0);
+
+  // Cada combinação de deps (e cada "recarregar") é uma consulta. O resultado guarda de qual
+  // consulta veio: se não bate com a atual, ela ainda está carregando. Assim o effect não
+  // precisa ligar o "carregando" na mão, e os dados antigos continuam na tela até chegar o novo.
+  const consulta = JSON.stringify([...deps, versao]);
+  const [resultado, setResultado] = useState({
+    consulta: null,
+    dados: null,
+    erro: null,
+  });
 
   useEffect(() => {
     // Resposta que chega depois de desmontar (ou de os deps mudarem) é descartada
     let ativo = true;
-    setCarregando(true);
-    setErro(null);
 
     Promise.resolve()
       .then(fn)
-      .then((res) => {
-        if (ativo) setDados(res);
+      .then((dados) => {
+        if (ativo) setResultado({ consulta, dados, erro: null });
       })
       .catch((e) => {
-        if (ativo) setErro(e.message);
-      })
-      .finally(() => {
-        if (ativo) setCarregando(false);
+        if (ativo)
+          setResultado((atual) => ({
+            consulta,
+            dados: atual.dados,
+            erro: e.message,
+          }));
       });
 
     return () => {
       ativo = false;
     };
+    // Os deps vêm de quem chama, como no próprio useEffect: `consulta` muda junto com eles
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...deps, versao]);
+  }, [consulta]);
 
+  const carregando = resultado.consulta !== consulta;
   const recarregar = useCallback(() => setVersao((v) => v + 1), []);
+  const setDados = useCallback(
+    (dados) => setResultado((atual) => ({ ...atual, dados })),
+    [],
+  );
 
-  return { dados, carregando, erro, recarregar, setDados };
+  return {
+    dados: resultado.dados,
+    carregando,
+    erro: carregando ? null : resultado.erro,
+    recarregar,
+    setDados,
+  };
 }

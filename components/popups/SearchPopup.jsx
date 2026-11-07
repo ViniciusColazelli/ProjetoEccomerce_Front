@@ -15,6 +15,8 @@ import { S, T } from "styles/theme";
 const MINIMO_LETRAS = 2;
 const RESULTADOS = 5;
 
+const chaveDaConsulta = (termo, tentativa) => `${tentativa}|${termo}`;
+
 const linkVitrine = (nome) =>
   nome ? { pathname: "/produtos", query: { nome } } : "/produtos";
 
@@ -31,37 +33,44 @@ export default function SearchPopup({ onClose }) {
   const [busca, setBusca] = useState("");
   const termo = useDebounce(busca.trim(), 300);
   const [tentativa, setTentativa] = useState(0);
-  // { termo, produtos, total } da última busca que terminou, ou { termo, erro }
+  // { consulta, termo, produtos, total } da última busca que terminou, ou { consulta, termo, erro }.
+  // `consulta` diz de qual termo e tentativa ela veio: se não bate com a atual, ainda está buscando
   const [resultado, setResultado] = useState(null);
-  const [carregando, setCarregando] = useState(false);
+  const carregando =
+    termo.length >= MINIMO_LETRAS &&
+    resultado?.consulta !== chaveDaConsulta(termo, tentativa);
 
   useEffect(() => {
-    if (termo.length < MINIMO_LETRAS) {
-      setResultado(null);
-      setCarregando(false);
-      return;
-    }
+    if (termo.length < MINIMO_LETRAS) return;
 
     // Cada letra nova cancela a requisição anterior: a resposta velha nunca sobrescreve a nova
     const controle = new AbortController();
-    setCarregando(true);
+    const consulta = chaveDaConsulta(termo, tentativa);
 
     listarProdutos(
       { nome: termo, tamanhoPagina: RESULTADOS, somenteDisponiveis: true },
       { signal: controle.signal },
     )
-      .then((res) => {
-        setResultado({ termo, produtos: res.produtos, total: res.total });
-        setCarregando(false);
-      })
+      .then((res) =>
+        setResultado({
+          consulta,
+          termo,
+          produtos: res.produtos,
+          total: res.total,
+        }),
+      )
       .catch((e) => {
-        if (e.cancelado) return;
-        setResultado({ termo, erro: e.message });
-        setCarregando(false);
+        if (!e.cancelado) setResultado({ consulta, termo, erro: e.message });
       });
 
     return () => controle.abort();
   }, [termo, tentativa]);
+
+  // Apagou até ficar curto: some com o resultado antigo, e a próxima busca começa do "Buscando…"
+  function handleDigitar(e) {
+    setBusca(e.target.value);
+    if (e.target.value.trim().length < MINIMO_LETRAS) setResultado(null);
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -158,7 +167,7 @@ export default function SearchPopup({ onClose }) {
           placeholder="Buscar produtos..."
           value={busca}
           maxLength={200}
-          onChange={(e) => setBusca(e.target.value)}
+          onChange={handleDigitar}
           style={{ flex: 1, marginBottom: 0 }}
         />
         <Button type="submit" aria-label="Buscar" style={{ padding: "0 14px" }}>
