@@ -187,6 +187,10 @@ textarea:focus {
   filter: brightness(0.92);
   transform: translateY(-1px);
 }
+.bu-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 .bu-nav-link {
   position: relative;
@@ -308,6 +312,11 @@ textarea:focus {
   color: #bbb;
   text-decoration: line-through;
   cursor: not-allowed;
+}
+/* Sem estoque na combinação: continua clicável (a página mostra "Esgotado") */
+.bu-chip[data-esgotado="true"]:not([aria-pressed="true"]) {
+  color: #bbb;
+  text-decoration: line-through;
 }
 
 .bu-tab {
