@@ -4,8 +4,14 @@ module.exports = {
     return [
       {
         source: "/backend/:path*",
-        destination: `${process.env.API_URL || "http://localhost:5000"}/:path*`,
+        destination: `${process.env.API_URL || "http://localhost:5136"}/:path*`,
       },
+    ];
+  },
+  async redirects() {
+    return [
+      // O painel abre na lista de pedidos
+      { source: "/admin", destination: "/admin/pedidos", permanent: false },
     ];
   },
 };

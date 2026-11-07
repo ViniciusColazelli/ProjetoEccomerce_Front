@@ -1,3 +1,7 @@
 node_modules
 .next
 .env.development
+
+# Configurações locais (Claude Code, launch de cada máquina)
+.claude/
+projeto de PI front/
