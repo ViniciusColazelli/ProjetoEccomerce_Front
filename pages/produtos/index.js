@@ -1,6 +1,7 @@
 // pages/produtos/index.js
-// Vitrine: busca por nome, ordenação, só disponíveis e paginação
-import { useEffect, useState } from "react";
+// Vitrine. Os filtros moram na URL (?nome=&pagina=&ordenarPor=&direcao=), então dá para
+// compartilhar o link, voltar no navegador e chegar já filtrado pela busca ou pelas categorias.
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { listarProdutos } from "lib/produtos";
@@ -15,55 +16,175 @@ import Alert from "components/ui/Alert";
 import Loading from "components/ui/Loading";
 import Vazio from "components/ui/Vazio";
 import Button from "components/ui/Button";
-import { S } from "styles/theme";
 
-const TAMANHO_PAGINA = 12;
+const TAMANHO_PAGINA = 12; // a API aceita no máximo 50
 
 const ORDENACOES = [
-  { valor: "nome-asc", rotulo: "Nome (A–Z)" },
-  { valor: "nome-desc", rotulo: "Nome (Z–A)" },
-  { valor: "preco-asc", rotulo: "Menor preço" },
-  { valor: "preco-desc", rotulo: "Maior preço" },
+  { valor: "nome-asc", rotulo: "Nome A–Z", ordenarPor: "nome", direcao: "asc" },
+  {
+    valor: "preco-asc",
+    rotulo: "Menor preço",
+    ordenarPor: "preco",
+    direcao: "asc",
+  },
+  {
+    valor: "preco-desc",
+    rotulo: "Maior preço",
+    ordenarPor: "preco",
+    direcao: "desc",
+  },
 ];
+const ORDEM_PADRAO = ORDENACOES[0];
+
+// Valores inválidos na URL (pagina=abc, ordenarPor=xyz) caem no padrão
+function lerFiltros(query) {
+  const ordem =
+    ORDENACOES.find(
+      (o) => o.ordenarPor === query.ordenarPor && o.direcao === query.direcao,
+    ) ?? ORDEM_PADRAO;
+
+  return {
+    nome: typeof query.nome === "string" ? query.nome.trim() : "",
+    pagina: Math.max(1, parseInt(query.pagina, 10) || 1),
+    ordem,
+  };
+}
+
+// Só vai para a URL o que foge do padrão: /produtos fica limpo sem filtros
+function montarQuery({ nome, pagina, ordem }) {
+  const query = {};
+  if (nome) query.nome = nome;
+  if (pagina > 1) query.pagina = pagina;
+  if (ordem !== ORDEM_PADRAO) {
+    query.ordenarPor = ordem.ordenarPor;
+    query.direcao = ordem.direcao;
+  }
+  return query;
+}
 
 export default function Produtos() {
   const router = useRouter();
+  // Antes do isReady o router.query vem vazio em página estática
   if (!router.isReady) return <Loading />;
-  return <Vitrine buscaInicial={router.query.nome ?? ""} />;
+  return <Vitrine />;
 }
 
-function Vitrine({ buscaInicial }) {
+function Vitrine() {
   const router = useRouter();
-  const [busca, setBusca] = useState(buscaInicial);
-  const [ordem, setOrdem] = useState("nome-asc");
-  const [somenteDisponiveis, setSomenteDisponiveis] = useState(false);
-  const [pagina, setPagina] = useState(1);
-  const nome = useDebounce(busca.trim());
+  const filtros = lerFiltros(router.query);
+  const { nome, pagina, ordem } = filtros;
 
-  // A busca da Navbar troca o ?nome= com a vitrine já aberta
+  // Página, ordem e começar uma busca usam push (o "voltar" desfaz);
+  // refinar uma busca já feita usa replace, para não criar uma entrada por pausa na digitação
+  function navegar(mudancas, { substituir = false } = {}) {
+    const query = montarQuery({ ...filtros, ...mudancas });
+    router[substituir ? "replace" : "push"](
+      { pathname: "/produtos", query },
+      undefined,
+      { scroll: !substituir },
+    );
+  }
+
+  // ── Campo de busca ────────────────────────────────────────────
+  const [busca, setBusca] = useState(nome);
+  const buscaDigitada = useDebounce(busca.trim());
+  const enviada = useRef(nome); // último nome que este campo mandou para a URL
+
+  // Parou de digitar: leva a busca para a URL, voltando para a página 1
   useEffect(() => {
-    setBusca(router.query.nome ?? "");
-  }, [router.query.nome]);
+    if (buscaDigitada === nome) return;
+    enviada.current = buscaDigitada;
+    navegar(
+      { nome: buscaDigitada, pagina: 1 },
+      { substituir: !!nome && !!buscaDigitada },
+    );
+  }, [buscaDigitada]);
 
-  // Filtro novo começa da primeira página
-  useEffect(() => setPagina(1), [nome, ordem, somenteDisponiveis]);
+  // A URL mudou por fora (busca da Navbar, categoria, voltar do navegador): atualiza o campo.
+  // Se fomos nós que mandamos, não mexe: o usuário pode ter continuado digitando.
+  useEffect(() => {
+    if (nome !== enviada.current) {
+      enviada.current = nome;
+      setBusca(nome);
+    }
+  }, [nome]);
 
-  const [ordenarPor, direcao] = ordem.split("-");
-  const { dados, carregando, erro } = useConsulta(
+  // ── Dados ─────────────────────────────────────────────────────
+  const { dados, carregando, erro, recarregar } = useConsulta(
     () =>
       listarProdutos({
         pagina,
         tamanhoPagina: TAMANHO_PAGINA,
         nome: nome || undefined,
-        ordenarPor,
-        direcao,
-        somenteDisponiveis,
+        ordenarPor: ordem.ordenarPor,
+        direcao: ordem.direcao,
+        somenteDisponiveis: true,
       }),
-    [pagina, nome, ordem, somenteDisponiveis],
+    [nome, pagina, ordem.valor],
   );
 
   const produtos = dados?.produtos ?? [];
-  const filtrando = !!nome || somenteDisponiveis;
+  const total = dados?.total ?? 0;
+  const paginaAlemDoFim = !!dados && produtos.length === 0 && total > 0;
+
+  let conteudo;
+  if (carregando && !dados) {
+    conteudo = <Loading />;
+  } else if (erro) {
+    conteudo = (
+      <>
+        <Alert>Não foi possível carregar os produtos: {erro}</Alert>
+        <Button variant="outline" onClick={recarregar}>
+          Tentar de novo
+        </Button>
+      </>
+    );
+  } else if (paginaAlemDoFim) {
+    conteudo = (
+      <Vazio
+        acao={
+          <Button variant="outline" onClick={() => navegar({ pagina: 1 })}>
+            Ir para a primeira página
+          </Button>
+        }
+      >
+        Essa página não existe.
+      </Vazio>
+    );
+  } else if (produtos.length === 0) {
+    conteudo = nome ? (
+      <Vazio
+        acao={
+          <Button variant="outline" onClick={() => setBusca("")}>
+            Ver todos os produtos
+          </Button>
+        }
+      >
+        Nenhum produto encontrado para ‘{nome}’.
+      </Vazio>
+    ) : (
+      <Vazio>Nenhum produto disponível no momento.</Vazio>
+    );
+  } else {
+    conteudo = (
+      <>
+        <div
+          className="bu-produto-grid"
+          style={{ opacity: carregando ? 0.5 : 1, transition: "opacity 0.15s" }}
+        >
+          {produtos.map((p) => (
+            <ProdutoCard key={p.id} produto={p} />
+          ))}
+        </div>
+        <Paginacao
+          pagina={pagina}
+          tamanhoPagina={TAMANHO_PAGINA}
+          total={total}
+          onChange={(p) => navegar({ pagina: p })}
+        />
+      </>
+    );
+  }
 
   return (
     <main
@@ -71,15 +192,19 @@ function Vitrine({ buscaInicial }) {
       style={{ paddingTop: 48, paddingBottom: 80 }}
     >
       <Head>
-        <title>Produtos · Belíssima Uniformes</title>
+        <title>
+          {nome
+            ? `‘${nome}’ · Produtos · Belíssima Uniformes`
+            : "Produtos · Belíssima Uniformes"}
+        </title>
       </Head>
 
       <CabecalhoPagina
         eyebrow="Catálogo"
-        titulo="Nossos produtos"
+        titulo={nome ? `Resultados para ‘${nome}’` : "Nossos produtos"}
         subtitulo={
-          dados
-            ? `${dados.total} ${dados.total === 1 ? "produto" : "produtos"}`
+          dados && !erro
+            ? `${total} ${total === 1 ? "produto disponível" : "produtos disponíveis"}`
             : " "
         }
       />
@@ -97,76 +222,18 @@ function Vitrine({ buscaInicial }) {
         <Select
           aria-label="Ordenar por"
           opcoes={ORDENACOES}
-          value={ordem}
-          onChange={(e) => setOrdem(e.target.value)}
+          value={ordem.valor}
+          onChange={(e) =>
+            navegar({
+              ordem: ORDENACOES.find((o) => o.valor === e.target.value),
+              pagina: 1,
+            })
+          }
           style={{ marginBottom: 0 }}
         />
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            fontSize: 14,
-            color: S.soft,
-            height: 40,
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={somenteDisponiveis}
-            onChange={(e) => setSomenteDisponiveis(e.target.checked)}
-          />
-          Só disponíveis
-        </label>
       </div>
 
-      <Alert>{erro}</Alert>
-
-      {carregando && !dados ? (
-        <Loading />
-      ) : produtos.length === 0 ? (
-        <Vazio
-          acao={
-            filtrando && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setBusca("");
-                  setSomenteDisponiveis(false);
-                }}
-              >
-                Limpar filtros
-              </Button>
-            )
-          }
-        >
-          {filtrando
-            ? "Nenhum produto encontrado com esses filtros."
-            : "Ainda não há produtos no catálogo."}
-        </Vazio>
-      ) : (
-        <div
-          className="bu-produto-grid"
-          style={{ opacity: carregando ? 0.5 : 1, transition: "opacity 0.15s" }}
-        >
-          {produtos.map((p) => (
-            <ProdutoCard key={p.id} produto={p} />
-          ))}
-        </div>
-      )}
-
-      {dados && (
-        <Paginacao
-          pagina={pagina}
-          tamanhoPagina={TAMANHO_PAGINA}
-          total={dados.total}
-          onChange={(p) => {
-            setPagina(p);
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }}
-        />
-      )}
+      {conteudo}
     </main>
   );
 }
