@@ -1,21 +1,17 @@
 // hooks/usePerfil.js
 // O AuthProvider já buscou o perfil ao carregar (ou no login): a página só lê do contexto
-import { useEffect } from "react";
-import { useRouter } from "next/router";
 import { useAuthContext } from "context/AuthContext";
+import { useRotaProtegida } from "hooks/useRotaProtegida";
 
 export function usePerfil() {
-  const router = useRouter();
-  const { usuario, pronto, atualizarUsuario } = useAuthContext();
+  const { atualizarUsuario } = useAuthContext();
 
   // Sem sessão (visitante, logout ou sessão expirada): volta para a home
-  useEffect(() => {
-    if (pronto && !usuario) router.replace("/");
-  }, [pronto, usuario]);
+  const { usuario, liberado } = useRotaProtegida();
 
   return {
     perfil: usuario,
-    carregando: !pronto || !usuario,
+    carregando: !liberado,
     onPerfilAtualizado: atualizarUsuario,
   };
 }

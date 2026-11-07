@@ -8,6 +8,8 @@ import ContatoLink from "components/ui/ContatoLink";
 import UserMenu from "./UserMenu";
 import { S } from "styles/theme";
 import { useAuthContext } from "context/AuthContext";
+import { usePopup } from "context/PopupContext";
+import { useCarrinho } from "context/CarrinhoContext";
 import { LINKS } from "lib/navegacao";
 
 const linkTopo = { display: "flex", alignItems: "center", gap: 6 };
@@ -47,8 +49,10 @@ function TopBar() {
   );
 }
 
-export default function Navbar({ onSearch, onAuth, onCart }) {
+export default function Navbar() {
   const { usuario } = useAuthContext();
+  const { toggle } = usePopup();
+  const { totalPecas } = useCarrinho();
 
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 100 }}>
@@ -95,21 +99,31 @@ export default function Navbar({ onSearch, onAuth, onCart }) {
 
           {/* Ações */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <NavBtn onClick={onSearch}>
+            <NavBtn onClick={() => toggle("search")} label="Buscar produtos">
               <Icon name="search" />
             </NavBtn>
 
             {usuario ? (
               <UserMenu />
             ) : (
-              <NavBtn onClick={onAuth}>
+              <NavBtn onClick={() => toggle("auth")} label="Entrar">
                 <Icon name="user" />
               </NavBtn>
             )}
 
-            <NavBtn onClick={onCart} badge>
+            <NavBtn
+              onClick={() => toggle("cart")}
+              badge={totalPecas}
+              label="Carrinho"
+            >
               <Icon name="bag" />
             </NavBtn>
+
+            <span className="bu-nav-menu">
+              <NavBtn onClick={() => toggle("menu")} label="Menu">
+                <Icon name="menu" />
+              </NavBtn>
+            </span>
           </div>
         </div>
       </nav>

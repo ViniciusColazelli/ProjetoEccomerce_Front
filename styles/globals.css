@@ -43,12 +43,16 @@ a {
 
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 2px solid #a52021;
   outline-offset: 2px;
 }
 
-input:focus {
+input:focus,
+select:focus,
+textarea:focus {
   border-color: #647c84 !important;
   box-shadow: 0 0 0 3px rgba(100, 124, 132, 0.15);
 }
@@ -91,6 +95,85 @@ input:focus {
   display: grid;
   grid-template-columns: 1.1fr 1fr 1.1fr 1.3fr;
   gap: 2.5rem;
+}
+
+.bu-produto-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px 20px;
+}
+
+.bu-detalhe-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.bu-checkout-grid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 40px;
+  align-items: start;
+}
+
+.bu-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 20px;
+}
+.bu-filtros > * {
+  flex: 1 1 160px;
+}
+
+/* Botões de menu móvel: só aparecem quando a barra de links some */
+.bu-nav-menu {
+  display: none;
+}
+
+/* ── Tabelas (painel) ───────────────────────────────────── */
+.bu-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  background: #fff;
+  border: 0.5px solid #e2e2e2;
+  border-radius: 14px;
+}
+.bu-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.bu-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #999;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid #e2e2e2;
+  white-space: nowrap;
+}
+.bu-table td {
+  padding: 12px 16px;
+  border-bottom: 0.5px solid #f0f0f0;
+  vertical-align: middle;
+}
+.bu-table tr:last-child td {
+  border-bottom: none;
+}
+.bu-table tbody tr {
+  transition: background 0.12s;
+}
+.bu-table tbody tr:hover {
+  background: #fafafa;
+}
+.bu-table .bu-num {
+  text-align: right;
+  white-space: nowrap;
 }
 
 /* ── Interações ─────────────────────────────────────────── */
@@ -171,6 +254,85 @@ input:focus {
 .bu-text-link:hover {
   text-decoration-color: #a52021;
 }
+
+.bu-icon-btn {
+  border: none;
+  background: none;
+  padding: 6px;
+  border-radius: 8px;
+  display: inline-flex;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.bu-icon-btn:hover:not(:disabled) {
+  background: #f2f2f2;
+}
+.bu-icon-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.bu-produto-card .bu-produto-img {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+.bu-produto-card:hover .bu-produto-img {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Botão de opção (tamanho, cor, filtro) */
+.bu-chip {
+  padding: 8px 16px;
+  border: 0.5px solid #e2e2e2;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.bu-chip:hover:not(:disabled) {
+  border-color: #111;
+}
+.bu-chip[aria-pressed="true"] {
+  border-color: #a52021;
+  background: #a52021;
+  color: #fff;
+}
+.bu-chip:disabled {
+  color: #bbb;
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.bu-tab {
+  padding: 10px 2px;
+  font-size: 14px;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+.bu-tab:hover {
+  color: #111;
+}
+.bu-tab[aria-current="page"],
+.bu-tab[aria-selected="true"] {
+  color: #a52021;
+  border-bottom-color: #a52021;
+}
 /* ── Animações ──────────────────────────────────────────── */
 @keyframes bu-pop {
   from {
@@ -226,6 +388,23 @@ input:focus {
   }
   .bu-nav-links {
     display: none !important;
+  }
+  .bu-nav-menu {
+    display: block;
+  }
+  .bu-produto-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bu-detalhe-grid,
+  .bu-checkout-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+@media (max-width: 720px) {
+  .bu-produto-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

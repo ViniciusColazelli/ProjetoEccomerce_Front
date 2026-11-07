@@ -31,7 +31,7 @@ function MenuItem({ onClick, color = S.dark, children }) {
 
 export default function UserMenu() {
   const router = useRouter();
-  const { usuario, logout } = useAuthContext();
+  const { usuario, isAdmin, logout } = useAuthContext();
   const [aberto, setAberto] = useState(false);
 
   const primeiroNome = usuario.nome?.split(" ")[0] ?? "Usuário";
@@ -108,6 +108,12 @@ export default function UserMenu() {
             style={{ height: "0.5px", background: S.border, margin: "8px 0" }}
           />
           <MenuItem onClick={() => ir("/perfil")}>Minha conta</MenuItem>
+          <MenuItem onClick={() => ir("/pedidos")}>Meus pedidos</MenuItem>
+          {isAdmin && (
+            <MenuItem onClick={() => ir("/admin/pedidos")}>
+              Painel administrativo
+            </MenuItem>
+          )}
           <MenuItem color={S.danger} onClick={handleLogout}>
             Sair da conta
           </MenuItem>
