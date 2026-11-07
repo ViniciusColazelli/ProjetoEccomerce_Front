@@ -194,7 +194,7 @@ export default function OpcoesProduto({ produto, onMudou }) {
   }
 
   return (
-    <Card titulo="Opções">
+    <Card titulo="Opções" id="opcoes">
       <p
         style={{
           fontSize: 13,

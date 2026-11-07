@@ -7,7 +7,7 @@ import { obterPedidoAdmin, alterarStatusPedido } from "lib/pedidosAdmin";
 import { formatarData } from "lib/formatar";
 import { proximosStatus, rotuloStatus } from "lib/statusPedido";
 import { useConsulta } from "hooks/useConsulta";
-import AdminShell from "components/admin/AdminShell";
+import AdminLayout from "components/admin/AdminLayout";
 import ItensPedido from "components/pedidos/ItensPedido";
 import StatusBadge from "components/ui/StatusBadge";
 import Button from "components/ui/Button";
@@ -26,13 +26,13 @@ const AVISOS = {
 export default function AdminPedido() {
   const router = useRouter();
   return (
-    <AdminShell titulo={`Pedido #${router.query.id ?? ""}`}>
+    <AdminLayout titulo={`Pedido #${router.query.id ?? ""}`}>
       {router.isReady ? (
         <DetalhePedido key={router.query.id} id={router.query.id} />
       ) : (
         <Loading />
       )}
-    </AdminShell>
+    </AdminLayout>
   );
 }
 

@@ -10,8 +10,8 @@ module.exports = {
   },
   async redirects() {
     return [
-      // O painel abre na lista de pedidos
-      { source: "/admin", destination: "/admin/pedidos", permanent: false },
+      // O painel abre no primeiro item do menu (lib/navegacao.js)
+      { source: "/admin", destination: "/admin/produtos", permanent: false },
     ];
   },
 };

@@ -47,7 +47,7 @@ export default function VariantesProduto({ produto, onMudou }) {
   );
 
   return (
-    <Card titulo="Variantes">
+    <Card titulo="Variantes" id="variantes">
       <div
         style={{
           display: "flex",

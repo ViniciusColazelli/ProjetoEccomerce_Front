@@ -7,7 +7,7 @@ import { listarEstoque, listarMovimentacoes } from "lib/estoqueAdmin";
 import { listarProdutosAdmin } from "lib/produtosAdmin";
 import { formatarData, descreverVariante } from "lib/formatar";
 import { useConsulta } from "hooks/useConsulta";
-import AdminShell from "components/admin/AdminShell";
+import AdminLayout from "components/admin/AdminLayout";
 import MovimentarEstoque from "components/admin/MovimentarEstoque";
 import { Badge, BadgeAtivo } from "components/ui/StatusBadge";
 import Paginacao from "components/ui/Paginacao";
@@ -34,13 +34,13 @@ const botaoTexto = {
 export default function AdminEstoque() {
   const router = useRouter();
   return (
-    <AdminShell titulo="Estoque">
+    <AdminLayout titulo="Estoque">
       {router.isReady ? (
         <Estoque produtoInicial={router.query.produtoId ?? ""} />
       ) : (
         <Loading />
       )}
-    </AdminShell>
+    </AdminLayout>
   );
 }
 

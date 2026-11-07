@@ -1,6 +1,7 @@
 // pages/admin/produtos/[id].js
 // Edição do produto: dados, opções (tamanho/cor/personalização) e variantes
 import { useRouter } from "next/router";
+import Head from "next/head";
 import Link from "next/link";
 import {
   obterProdutoAdmin,
@@ -9,10 +10,11 @@ import {
 } from "lib/produtosAdmin";
 import { useConsulta } from "hooks/useConsulta";
 import { useAsyncAction } from "hooks/useAsyncAction";
-import AdminShell from "components/admin/AdminShell";
+import AdminLayout from "components/admin/AdminLayout";
 import ProdutoForm from "components/admin/ProdutoForm";
 import OpcoesProduto from "components/admin/OpcoesProduto";
 import VariantesProduto from "components/admin/VariantesProduto";
+import PassoAPasso from "components/admin/PassoAPasso";
 import { BadgeAtivo } from "components/ui/StatusBadge";
 import Card from "components/ui/Card";
 import Button from "components/ui/Button";
@@ -24,38 +26,65 @@ import { S, T } from "styles/theme";
 export default function AdminProduto() {
   const router = useRouter();
   return (
-    <AdminShell titulo="Editar produto">
+    <AdminLayout titulo="Editar produto">
       {router.isReady ? (
         <EditarProduto key={router.query.id} id={router.query.id} />
       ) : (
         <Loading />
       )}
-    </AdminShell>
+    </AdminLayout>
   );
 }
 
 function EditarProduto({ id }) {
+  // 404 vira null: "Produto não encontrado" em vez da mensagem crua da API
   const {
     dados: produto,
     carregando,
     erro,
     recarregar,
-  } = useConsulta(() => obterProdutoAdmin(id), [id]);
+  } = useConsulta(
+    () =>
+      obterProdutoAdmin(id).catch((e) => {
+        if (e.status === 404) return null;
+        throw e;
+      }),
+    [id],
+  );
   const status = useAsyncAction(async () => {
     await alterarStatusProduto(id, { ativo: !produto.ativo });
     recarregar();
   });
 
   if (carregando && !produto) return <Loading />;
+
   if (erro && !produto)
     return (
-      <Vazio acao={<Button href="/admin/produtos">Voltar aos produtos</Button>}>
-        {erro}
+      <Vazio
+        acao={
+          <Button variant="outline" onClick={recarregar}>
+            Tentar de novo
+          </Button>
+        }
+      >
+        Não foi possível carregar o produto: {erro}
+      </Vazio>
+    );
+
+  if (!produto)
+    return (
+      <Vazio
+        acao={<Button href="/admin/produtos">Ver todos os produtos</Button>}
+      >
+        Produto não encontrado.
       </Vazio>
     );
 
   return (
     <div style={{ maxWidth: 900 }}>
+      <Head>
+        <title>{`${produto.nome} · Painel admin · Belíssima Uniformes`}</title>
+      </Head>
       <Link
         href="/admin/produtos"
         className="bu-link-muted"
@@ -95,6 +124,8 @@ function EditarProduto({ id }) {
       </div>
 
       <Alert>{status.erro || erro}</Alert>
+
+      <PassoAPasso produto={produto} />
 
       <Card titulo="Dados do produto">
         <ProdutoForm

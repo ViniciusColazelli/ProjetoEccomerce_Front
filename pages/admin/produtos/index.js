@@ -1,25 +1,20 @@
 // pages/admin/produtos/index.js
-// Catálogo completo (ativos e inativos), cadastro e ativar/desativar
-import { useEffect, useState } from "react";
+// Catálogo completo (ativos e inativos): busca, filtro de situação, paginação e ativar/desativar.
+// Os filtros ficam na URL (?nome=&ativo=&pagina=) para sobreviver à ida e volta da edição.
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import {
-  listarProdutosAdmin,
-  registrarProduto,
-  alterarStatusProduto,
-} from "lib/produtosAdmin";
+import { listarProdutosAdmin, alterarStatusProduto } from "lib/produtosAdmin";
 import { formatarPreco } from "lib/formatar";
 import { useConsulta } from "hooks/useConsulta";
 import { useDebounce } from "hooks/useDebounce";
-import AdminShell from "components/admin/AdminShell";
-import ProdutoForm from "components/admin/ProdutoForm";
+import AdminLayout from "components/admin/AdminLayout";
 import { BadgeAtivo } from "components/ui/StatusBadge";
 import Paginacao from "components/ui/Paginacao";
 import Campo from "components/ui/Campo";
 import Input from "components/ui/Input";
 import Select from "components/ui/Select";
 import Button from "components/ui/Button";
-import Modal from "components/ui/Modal";
 import Alert from "components/ui/Alert";
 import Loading from "components/ui/Loading";
 import Vazio from "components/ui/Vazio";
@@ -35,24 +30,59 @@ const OPCOES_ATIVO = [
 ];
 
 export default function AdminProdutos() {
+  const router = useRouter();
   return (
-    <AdminShell titulo="Produtos">
-      <ListaProdutos />
-    </AdminShell>
+    <AdminLayout titulo="Produtos">
+      {router.isReady ? <ListaProdutos /> : <Loading />}
+    </AdminLayout>
   );
+}
+
+function lerFiltros(query) {
+  return {
+    nome: typeof query.nome === "string" ? query.nome.trim() : "",
+    ativo: query.ativo === "true" || query.ativo === "false" ? query.ativo : "",
+    pagina: Math.max(1, parseInt(query.pagina, 10) || 1),
+  };
 }
 
 function ListaProdutos() {
   const router = useRouter();
-  const [busca, setBusca] = useState("");
-  const [ativo, setAtivo] = useState("");
-  const [pagina, setPagina] = useState(1);
-  const [criando, setCriando] = useState(false);
-  const [alterando, setAlterando] = useState(null); // id em alteração
-  const [erroAcao, setErroAcao] = useState(null);
-  const nome = useDebounce(busca.trim());
+  const filtros = lerFiltros(router.query);
+  const { nome, ativo, pagina } = filtros;
 
-  useEffect(() => setPagina(1), [nome, ativo]);
+  function navegar(mudancas, { substituir = false } = {}) {
+    const f = { ...filtros, ...mudancas };
+    const query = {};
+    if (f.nome) query.nome = f.nome;
+    if (f.ativo) query.ativo = f.ativo;
+    if (f.pagina > 1) query.pagina = f.pagina;
+    router[substituir ? "replace" : "push"]({
+      pathname: "/admin/produtos",
+      query,
+    });
+  }
+
+  // Busca: digitar atualiza a URL depois da pausa (mesma lógica da vitrine)
+  const [busca, setBusca] = useState(nome);
+  const buscaDigitada = useDebounce(busca.trim());
+  const enviada = useRef(nome);
+
+  useEffect(() => {
+    if (buscaDigitada === nome) return;
+    enviada.current = buscaDigitada;
+    navegar(
+      { nome: buscaDigitada, pagina: 1 },
+      { substituir: !!nome && !!buscaDigitada },
+    );
+  }, [buscaDigitada]);
+
+  useEffect(() => {
+    if (nome !== enviada.current) {
+      enviada.current = nome;
+      setBusca(nome);
+    }
+  }, [nome]);
 
   const { dados, carregando, erro, recarregar } = useConsulta(
     () =>
@@ -67,10 +97,9 @@ function ListaProdutos() {
     [pagina, nome, ativo],
   );
 
-  async function criar(dados) {
-    const novo = await registrarProduto(dados);
-    router.push(`/admin/produtos/${novo.id}`);
-  }
+  // Ativar/desativar direto na lista
+  const [alterando, setAlterando] = useState(null); // id em alteração
+  const [erroAcao, setErroAcao] = useState(null);
 
   async function alternar(produto) {
     setAlterando(produto.id);
@@ -84,6 +113,8 @@ function ListaProdutos() {
       setAlterando(null);
     }
   }
+
+  const filtrando = !!nome || !!ativo;
 
   return (
     <>
@@ -102,26 +133,70 @@ function ListaProdutos() {
           <Select
             opcoes={OPCOES_ATIVO}
             value={ativo}
-            onChange={(e) => setAtivo(e.target.value)}
+            onChange={(e) => navegar({ ativo: e.target.value, pagina: 1 })}
             style={{ marginBottom: 0 }}
           />
         </Campo>
         <div style={{ flex: "0 0 auto" }}>
-          <Button onClick={() => setCriando(true)}>
+          <Button href="/admin/produtos/novo">
             <Icon name="plus" size={16} color={S.white} stroke={2} />
             Novo produto
           </Button>
         </div>
       </div>
 
-      <Alert>{erro || erroAcao}</Alert>
+      <Alert>{erroAcao}</Alert>
 
       {carregando && !dados ? (
         <Loading />
-      ) : !dados || dados.produtos.length === 0 ? (
-        <Vazio>Nenhum produto encontrado.</Vazio>
+      ) : erro ? (
+        <>
+          <Alert>Não foi possível carregar os produtos: {erro}</Alert>
+          <Button variant="outline" onClick={recarregar}>
+            Tentar de novo
+          </Button>
+        </>
+      ) : dados.produtos.length === 0 ? (
+        dados.total > 0 ? (
+          <Vazio
+            acao={
+              <Button variant="outline" onClick={() => navegar({ pagina: 1 })}>
+                Ir para a primeira página
+              </Button>
+            }
+          >
+            Essa página não existe.
+          </Vazio>
+        ) : (
+          <Vazio
+            acao={
+              filtrando ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setBusca("");
+                    navegar({ nome: "", ativo: "", pagina: 1 });
+                  }}
+                >
+                  Limpar filtros
+                </Button>
+              ) : (
+                <Button href="/admin/produtos/novo">
+                  Cadastrar o primeiro produto
+                </Button>
+              )
+            }
+          >
+            {filtrando
+              ? "Nenhum produto encontrado com esses filtros."
+              : "Nenhum produto cadastrado ainda."}
+          </Vazio>
+        )
       ) : (
         <>
+          <p style={{ fontSize: 13, color: S.muted, marginBottom: 10 }}>
+            {dados.total} {dados.total === 1 ? "produto" : "produtos"}
+          </p>
           <div
             className="bu-table-wrap"
             style={{ opacity: carregando ? 0.5 : 1 }}
@@ -211,18 +286,9 @@ function ListaProdutos() {
             pagina={pagina}
             tamanhoPagina={TAMANHO_PAGINA}
             total={dados.total}
-            onChange={setPagina}
+            onChange={(p) => navegar({ pagina: p })}
           />
         </>
-      )}
-
-      {criando && (
-        <Modal titulo="Novo produto" onClose={() => setCriando(false)}>
-          <p style={{ fontSize: 13, color: S.muted, marginBottom: 16 }}>
-            Depois de criar, cadastre tamanhos e cores e gere as variantes.
-          </p>
-          <ProdutoForm onSubmit={criar} textoBotao="Criar produto" />
-        </Modal>
       )}
     </>
   );

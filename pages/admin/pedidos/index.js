@@ -7,7 +7,7 @@ import { formatarData, formatarPreco } from "lib/formatar";
 import { LISTA_STATUS, rotuloStatus } from "lib/statusPedido";
 import { useConsulta } from "hooks/useConsulta";
 import { useDebounce } from "hooks/useDebounce";
-import AdminShell from "components/admin/AdminShell";
+import AdminLayout from "components/admin/AdminLayout";
 import StatusBadge from "components/ui/StatusBadge";
 import Paginacao from "components/ui/Paginacao";
 import Campo from "components/ui/Campo";
@@ -27,9 +27,9 @@ const OPCOES_STATUS = [
 
 export default function AdminPedidos() {
   return (
-    <AdminShell titulo="Pedidos">
+    <AdminLayout titulo="Pedidos">
       <ListaPedidos />
-    </AdminShell>
+    </AdminLayout>
   );
 }
 
