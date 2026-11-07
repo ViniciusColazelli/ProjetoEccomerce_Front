@@ -1,8 +1,9 @@
 // pages/pedidos/index.js
-// Histórico de pedidos do cliente logado
-import { useState } from "react";
+// Histórico de pedidos do cliente logado. A página fica na URL (?pagina=2),
+// então voltar do detalhe do pedido cai na mesma página da lista.
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { listarMeusPedidos } from "lib/pedidos";
 import { formatarData, formatarPreco } from "lib/formatar";
 import { useConsulta } from "hooks/useConsulta";
@@ -19,6 +20,7 @@ import { S } from "styles/theme";
 const TAMANHO_PAGINA = 10;
 
 export default function MeusPedidos() {
+  const router = useRouter();
   return (
     <main
       className="bu-container"
@@ -29,26 +31,56 @@ export default function MeusPedidos() {
       </Head>
       <CabecalhoPagina eyebrow="Minha conta" titulo="Meus pedidos" />
       <RotaProtegida>
-        <ListaPedidos />
+        {router.isReady ? <ListaPedidos /> : <Loading />}
       </RotaProtegida>
     </main>
   );
 }
 
 function ListaPedidos() {
-  const [pagina, setPagina] = useState(1);
-  const { dados, carregando, erro } = useConsulta(
+  const router = useRouter();
+  const pagina = Math.max(1, parseInt(router.query.pagina, 10) || 1);
+
+  const { dados, carregando, erro, recarregar } = useConsulta(
     () => listarMeusPedidos({ pagina, tamanhoPagina: TAMANHO_PAGINA }),
     [pagina],
   );
 
+  const irParaPagina = (p) =>
+    router.push(p > 1 ? `/pedidos?pagina=${p}` : "/pedidos");
+
+  // A linha toda abre o pedido. O link do nº continua lá para teclado e "abrir em nova aba"
+  function abrirPedido(e, id) {
+    if (e.target.closest("a")) return;
+    router.push(`/pedidos/${id}`);
+  }
+
   if (carregando && !dados) return <Loading />;
-  if (erro) return <Alert>{erro}</Alert>;
+
+  if (erro)
+    return (
+      <>
+        <Alert>Não foi possível carregar seus pedidos: {erro}</Alert>
+        <Button variant="outline" onClick={recarregar}>
+          Tentar de novo
+        </Button>
+      </>
+    );
 
   if (dados.pedidos.length === 0)
-    return (
+    return pagina > 1 ? (
+      <Vazio
+        acao={
+          <Button variant="outline" onClick={() => irParaPagina(1)}>
+            Ir para a primeira página
+          </Button>
+        }
+      >
+        Essa página não existe.
+      </Vazio>
+    ) : (
       <Vazio acao={<Button href="/produtos">Ver produtos</Button>}>
-        Você ainda não fez nenhum pedido.
+        Você ainda não fez pedidos.
       </Vazio>
     );
 
@@ -63,24 +95,30 @@ function ListaPedidos() {
               <th>Status</th>
               <th className="bu-num">Peças</th>
               <th className="bu-num">Total</th>
-              <th />
             </tr>
           </thead>
           <tbody>
             {dados.pedidos.map((p) => (
-              <tr key={p.id}>
-                <td style={{ fontWeight: 600 }}>#{p.id}</td>
+              <tr
+                key={p.id}
+                className="bu-tr-link"
+                onClick={(e) => abrirPedido(e, p.id)}
+              >
+                <td>
+                  <Link
+                    href={`/pedidos/${p.id}`}
+                    style={{ fontWeight: 600 }}
+                    aria-label={`Abrir pedido ${p.id}`}
+                  >
+                    #{p.id}
+                  </Link>
+                </td>
                 <td style={{ color: S.soft }}>{formatarData(p.criadoEm)}</td>
                 <td>
                   <StatusBadge status={p.status} />
                 </td>
                 <td className="bu-num">{p.quantidadePecas}</td>
                 <td className="bu-num">{formatarPreco(p.total)}</td>
-                <td className="bu-num">
-                  <Link href={`/pedidos/${p.id}`} className="bu-text-link">
-                    Ver detalhes
-                  </Link>
-                </td>
               </tr>
             ))}
           </tbody>
@@ -91,7 +129,7 @@ function ListaPedidos() {
         pagina={pagina}
         tamanhoPagina={TAMANHO_PAGINA}
         total={dados.total}
-        onChange={setPagina}
+        onChange={irParaPagina}
       />
     </>
   );

@@ -1,10 +1,15 @@
 // components/ui/CategoryCard.jsx
-// O zoom da foto no hover fica no globals.css (.bu-cat-card)
+// Leva para a vitrine filtrada pela categoria. O zoom da foto no hover fica no globals.css (.bu-cat-card)
+import Link from "next/link";
 import { S } from "styles/theme";
 
 export default function CategoryCard({ cat }) {
   return (
-    <div className="bu-cat-card" style={{ cursor: "pointer" }}>
+    <Link
+      href={{ pathname: "/produtos", query: { nome: cat.busca } }}
+      className="bu-cat-card"
+      style={{ display: "block" }}
+    >
       <div
         style={{
           background: S.imageBg,
@@ -39,6 +44,6 @@ export default function CategoryCard({ cat }) {
           Ver peças
         </span>
       </div>
-    </div>
+    </Link>
   );
 }

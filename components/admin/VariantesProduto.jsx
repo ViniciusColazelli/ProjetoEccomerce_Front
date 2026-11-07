@@ -41,13 +41,29 @@ export default function VariantesProduto({ produto, onMudou }) {
     }
   }
 
-  const variantes = [...produto.variantes].sort(
-    (a, b) =>
-      a.tamanhoId - b.tamanhoId || (a.cor ?? "").localeCompare(b.cor ?? ""),
+  const variantes = produto.variantes;
+
+  // Linhas e colunas da grade: opções ativas e também as inativas que ainda têm variante
+  const usada = (campo, id) => variantes.some((v) => v[campo] === id);
+  const tamanhos = produto.opcoes.filter(
+    (o) => o.tipo === "Tamanho" && (o.ativo || usada("tamanhoId", o.id)),
   );
+  const cores = produto.opcoes.filter(
+    (o) => o.tipo === "Cor" && (o.ativo || usada("corId", o.id)),
+  );
+  // Coluna "sem cor": produto sem cor, ou variante antiga gerada antes das cores
+  const colunas = [
+    ...(cores.length === 0 || usada("corId", null)
+      ? [{ id: null, valor: cores.length ? "Sem cor" : "Estoque", ativo: true }]
+      : []),
+    ...cores,
+  ];
+
+  const varianteDe = (tamanhoId, corId) =>
+    variantes.find((v) => v.tamanhoId === tamanhoId && v.corId === corId);
 
   return (
-    <Card titulo="Variantes">
+    <Card titulo="Variantes" id="variantes">
       <div
         style={{
           display: "flex",
@@ -92,57 +108,93 @@ export default function VariantesProduto({ produto, onMudou }) {
         </p>
       ) : (
         <div className="bu-table-wrap">
-          <table className="bu-table">
+          <table
+            className="bu-table bu-grade"
+            aria-label="Variantes: tamanho por cor"
+          >
             <thead>
               <tr>
-                <th>Tamanho</th>
-                <th>Cor</th>
-                <th className="bu-num">Estoque</th>
-                <th>Situação</th>
-                <th />
+                <th>Tamanho \ Cor</th>
+                {colunas.map((c) => (
+                  <th key={c.id ?? "sem-cor"} className="bu-centro">
+                    {c.valor}
+                    {!c.ativo && (
+                      <span className="bu-grade-inativo"> (inativa)</span>
+                    )}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {variantes.map((v) => (
-                <tr key={v.id}>
-                  <td style={{ fontWeight: 500 }}>{v.tamanho}</td>
-                  <td style={{ color: v.cor ? S.dark : S.muted }}>
-                    {v.cor ?? "—"}
-                  </td>
-                  <td
-                    className="bu-num"
-                    style={{
-                      fontWeight: 600,
-                      color: v.quantidade === 0 ? S.danger : S.dark,
-                    }}
-                  >
-                    {v.quantidade}
-                  </td>
-                  <td>
-                    <BadgeAtivo ativo={v.ativo} />
-                  </td>
-                  <td className="bu-num">
-                    <button
-                      type="button"
-                      className="bu-text-link"
-                      disabled={ocupado === v.id}
-                      onClick={() => alternar(v)}
-                      style={{
-                        background: "none",
-                        border: "none",
-                        padding: 0,
-                        cursor: "pointer",
-                        fontFamily: S.sans,
-                        fontSize: 13,
-                      }}
-                    >
-                      {ocupado === v.id
-                        ? "..."
-                        : v.ativo
-                          ? "Desativar"
-                          : "Ativar"}
-                    </button>
-                  </td>
+              {tamanhos.map((t) => (
+                <tr key={t.id}>
+                  <th scope="row" style={{ fontWeight: 600, color: S.dark }}>
+                    {t.valor}
+                    {!t.ativo && (
+                      <span className="bu-grade-inativo"> (inativo)</span>
+                    )}
+                  </th>
+                  {colunas.map((c) => {
+                    const v = varianteDe(t.id, c.id);
+                    if (!v)
+                      return (
+                        <td key={c.id ?? "sem-cor"} className="bu-centro">
+                          <span className="bu-grade-vazia">
+                            {t.ativo && c.ativo ? "não gerada" : "—"}
+                          </span>
+                        </td>
+                      );
+                    return (
+                      <td
+                        key={c.id ?? "sem-cor"}
+                        className="bu-centro"
+                        style={{ opacity: v.ativo ? 1 : 0.55 }}
+                      >
+                        <span
+                          title={`Estoque de ${t.valor}${c.id ? ` ${c.valor}` : ""}`}
+                          style={{
+                            display: "block",
+                            fontSize: 17,
+                            fontWeight: 600,
+                            color: v.quantidade === 0 ? S.danger : S.dark,
+                          }}
+                        >
+                          {v.quantidade}
+                        </span>
+                        <span
+                          style={{
+                            display: "inline-flex",
+                            gap: 6,
+                            alignItems: "center",
+                            marginTop: 4,
+                          }}
+                        >
+                          <BadgeAtivo ativo={v.ativo} />
+                          <button
+                            type="button"
+                            className="bu-text-link"
+                            disabled={ocupado === v.id}
+                            onClick={() => alternar(v)}
+                            aria-label={`${v.ativo ? "Desativar" : "Ativar"} ${t.valor}${c.id ? ` ${c.valor}` : ""}`}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              padding: 0,
+                              cursor: "pointer",
+                              fontFamily: S.sans,
+                              fontSize: 12,
+                            }}
+                          >
+                            {ocupado === v.id
+                              ? "..."
+                              : v.ativo
+                                ? "Desativar"
+                                : "Ativar"}
+                          </button>
+                        </span>
+                      </td>
+                    );
+                  })}
                 </tr>
               ))}
             </tbody>
@@ -151,7 +203,7 @@ export default function VariantesProduto({ produto, onMudou }) {
       )}
       <p style={{ fontSize: 12, color: S.muted, marginTop: 10 }}>
         <Link
-          href={`/admin/estoque?produtoId=${produto.id}`}
+          href={`/admin/estoque/movimentacoes?produtoId=${produto.id}`}
           className="bu-text-link"
           style={{ fontSize: 12 }}
         >

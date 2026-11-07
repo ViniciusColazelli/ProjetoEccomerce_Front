@@ -1,38 +1,53 @@
 // pages/admin/pedidos/[id].js
-// Detalhe do pedido para a loja: cliente, itens e avanço de status
+// Detalhe do pedido para a loja: cliente, itens e avanço de status.
+// Só aparecem os próximos status permitidos (lib/statusPedido.js); a API confere de novo (409).
 import { useState } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import Link from "next/link";
 import { obterPedidoAdmin, alterarStatusPedido } from "lib/pedidosAdmin";
 import { formatarData } from "lib/formatar";
 import { proximosStatus, rotuloStatus } from "lib/statusPedido";
 import { useConsulta } from "hooks/useConsulta";
-import AdminShell from "components/admin/AdminShell";
+import AdminLayout from "components/admin/AdminLayout";
 import ItensPedido from "components/pedidos/ItensPedido";
 import StatusBadge from "components/ui/StatusBadge";
 import Button from "components/ui/Button";
 import Confirmar from "components/ui/Confirmar";
+import Alert from "components/ui/Alert";
 import Loading from "components/ui/Loading";
 import Vazio from "components/ui/Vazio";
 import { S, T } from "styles/theme";
 
-// O que cada mudança faz além de trocar o status (regras da API)
-const AVISOS = {
-  Pago: "Confirmar o pagamento dá baixa no estoque das peças. Se faltar saldo, a API recusa.",
-  Cancelado: "O pedido será cancelado e não poderá ser reaberto.",
-  Entregue: "Entregue é o status final do pedido.",
+// Mudanças com efeito além do status pedem confirmação antes
+const CONFIRMAR = {
+  Pago: {
+    titulo: "Confirmar o pagamento?",
+    texto:
+      "Isso dá baixa no estoque das peças do pedido. Se faltar alguma peça, a API recusa e nada muda.",
+    botao: "Confirmar pagamento",
+  },
+  Cancelado: {
+    titulo: "Cancelar o pedido?",
+    texto:
+      "O pedido será cancelado e não poderá ser reaberto. Nenhum estoque foi baixado, porque ele ainda não foi pago.",
+    botao: "Sim, cancelar",
+  },
 };
+
+// Depois do pagamento existem saídas de estoque ligadas ao pedido
+const BAIXOU_ESTOQUE = ["Pago", "EmProducao", "ProntoParaRetirada", "Entregue"];
 
 export default function AdminPedido() {
   const router = useRouter();
   return (
-    <AdminShell titulo={`Pedido #${router.query.id ?? ""}`}>
+    <AdminLayout titulo="Pedido">
       {router.isReady ? (
         <DetalhePedido key={router.query.id} id={router.query.id} />
       ) : (
         <Loading />
       )}
-    </AdminShell>
+    </AdminLayout>
   );
 }
 
@@ -46,19 +61,61 @@ function Info({ rotulo, children }) {
 }
 
 function DetalhePedido({ id }) {
+  // 404 vira null: "Pedido não encontrado"
   const {
     dados: pedido,
     carregando,
     erro,
     recarregar,
-  } = useConsulta(() => obterPedidoAdmin(id), [id]);
-  const [novoStatus, setNovoStatus] = useState(null);
+    setDados,
+  } = useConsulta(
+    () =>
+      obterPedidoAdmin(id).catch((e) => {
+        if (e.status === 404) return null;
+        throw e;
+      }),
+    [id],
+  );
+  const [confirmando, setConfirmando] = useState(null); // status que pede confirmação
+  const [mudando, setMudando] = useState(null); // status sendo gravado sem confirmação
+  const [erroStatus, setErroStatus] = useState(null);
+
+  // A API devolve o pedido atualizado: a tela usa a resposta, sem buscar de novo
+  async function gravarStatus(status) {
+    setErroStatus(null);
+    setDados(await alterarStatusPedido(id, { status }));
+  }
+
+  async function mudarDireto(status) {
+    setMudando(status);
+    try {
+      await gravarStatus(status);
+    } catch (e) {
+      setErroStatus(e.message);
+    } finally {
+      setMudando(null);
+    }
+  }
 
   if (carregando && !pedido) return <Loading />;
-  if (erro || !pedido)
+
+  if (erro && !pedido)
     return (
-      <Vazio acao={<Button href="/admin/pedidos">Voltar aos pedidos</Button>}>
-        {erro ?? "Pedido não encontrado."}
+      <Vazio
+        acao={
+          <Button variant="outline" onClick={recarregar}>
+            Tentar de novo
+          </Button>
+        }
+      >
+        Não foi possível carregar o pedido: {erro}
+      </Vazio>
+    );
+
+  if (!pedido)
+    return (
+      <Vazio acao={<Button href="/admin/pedidos">Ver todos os pedidos</Button>}>
+        Pedido não encontrado.
       </Vazio>
     );
 
@@ -66,6 +123,10 @@ function DetalhePedido({ id }) {
 
   return (
     <>
+      <Head>
+        <title>{`Pedido #${pedido.id} · Painel admin · Belíssima Uniformes`}</title>
+      </Head>
+
       <Link
         href="/admin/pedidos"
         className="bu-link-muted"
@@ -95,16 +156,24 @@ function DetalhePedido({ id }) {
               <Button
                 key={s}
                 variant={s === "Cancelado" ? "danger" : "primary"}
-                onClick={() => setNovoStatus(s)}
+                loading={mudando === s}
+                disabled={!!mudando}
+                onClick={() =>
+                  CONFIRMAR[s] ? setConfirmando(s) : mudarDireto(s)
+                }
               >
-                {s === "Cancelado"
-                  ? "Cancelar pedido"
-                  : `Marcar como ${rotuloStatus(s).toLowerCase()}`}
+                {mudando === s
+                  ? "Salvando..."
+                  : s === "Cancelado"
+                    ? "Cancelar pedido"
+                    : `Marcar como ${rotuloStatus(s).toLowerCase()}`}
               </Button>
             ))}
           </div>
         )}
       </div>
+
+      <Alert>{erroStatus}</Alert>
 
       <section
         style={{
@@ -136,6 +205,23 @@ function DetalhePedido({ id }) {
             ? formatarData(pedido.atualizadoEm, { comHora: true })
             : "—"}
         </Info>
+        <Info rotulo="Estoque">
+          {BAIXOU_ESTOQUE.includes(pedido.status) ? (
+            <Link
+              href={`/admin/estoque/movimentacoes?pedidoId=${pedido.id}`}
+              className="bu-text-link"
+              style={{ fontSize: 13 }}
+            >
+              Ver movimentações do pedido
+            </Link>
+          ) : (
+            <span style={{ color: S.muted, fontSize: 13 }}>
+              {pedido.status === "Cancelado"
+                ? "Cancelado antes do pagamento: nada foi baixado."
+                : "A baixa acontece quando o pagamento for confirmado."}
+            </span>
+          )}
+        </Info>
       </section>
 
       <ItensPedido pedido={pedido} />
@@ -149,24 +235,20 @@ function DetalhePedido({ id }) {
         </div>
       )}
 
-      {novoStatus && (
+      {confirmando && (
         <Confirmar
-          titulo={`Mudar para "${rotuloStatus(novoStatus)}"?`}
-          onConfirmar={async () => {
-            await alterarStatusPedido(id, { status: novoStatus });
-            recarregar();
-          }}
-          onClose={() => setNovoStatus(null)}
+          titulo={CONFIRMAR[confirmando].titulo}
+          textoConfirmar={CONFIRMAR[confirmando].botao}
+          onConfirmar={() => gravarStatus(confirmando)}
+          onClose={() => setConfirmando(null)}
         >
           <p>
             Pedido #{pedido.id}: {rotuloStatus(pedido.status)} →{" "}
             <strong style={{ color: S.dark }}>
-              {rotuloStatus(novoStatus)}
+              {rotuloStatus(confirmando)}
             </strong>
           </p>
-          {AVISOS[novoStatus] && (
-            <p style={{ marginTop: 12 }}>{AVISOS[novoStatus]}</p>
-          )}
+          <p style={{ marginTop: 12 }}>{CONFIRMAR[confirmando].texto}</p>
         </Confirmar>
       )}
     </>

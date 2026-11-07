@@ -6,8 +6,9 @@ import Head from "next/head";
 import Link from "next/link";
 import { obterProduto } from "lib/produtos";
 import { formatarPreco } from "lib/formatar";
+import { whatsappComTexto, LINK_EXTERNO } from "lib/contato";
 import { useConsulta } from "hooks/useConsulta";
-import { useCarrinho, MAXIMO_QUANTIDADE } from "context/CarrinhoContext";
+import { useCart, MAXIMO_ITENS, MAXIMO_QUANTIDADE } from "context/CartContext";
 import { usePopup } from "context/PopupContext";
 import Button from "components/ui/Button";
 import Quantidade from "components/ui/Quantidade";
@@ -15,6 +16,7 @@ import Alert from "components/ui/Alert";
 import Loading from "components/ui/Loading";
 import Vazio from "components/ui/Vazio";
 import Logo from "components/ui/Logo";
+import Icon from "components/ui/Icon";
 import { S, T } from "styles/theme";
 
 export default function ProdutoPage() {
@@ -24,18 +26,46 @@ export default function ProdutoPage() {
 }
 
 function Detalhe({ id }) {
+  // 404 (não existe ou saiu da vitrine) vira `null`: é "não encontrado", não erro
   const {
     dados: produto,
     carregando,
     erro,
-  } = useConsulta(() => obterProduto(id), [id]);
+    recarregar,
+  } = useConsulta(
+    () =>
+      obterProduto(id).catch((e) => {
+        if (e.status === 404) return null;
+        throw e;
+      }),
+    [id],
+  );
 
   if (carregando) return <Loading />;
-  if (erro || !produto)
+
+  if (erro)
     return (
       <main className="bu-container" style={{ paddingTop: 48 }}>
+        <Vazio
+          acao={
+            <Button variant="outline" onClick={recarregar}>
+              Tentar de novo
+            </Button>
+          }
+        >
+          Não foi possível carregar o produto: {erro}
+        </Vazio>
+      </main>
+    );
+
+  if (!produto)
+    return (
+      <main className="bu-container" style={{ paddingTop: 48 }}>
+        <Head>
+          <title>Produto não encontrado · Belíssima Uniformes</title>
+        </Head>
         <Vazio acao={<Button href="/produtos">Ver todos os produtos</Button>}>
-          {erro ?? "Produto não encontrado."}
+          Produto não encontrado.
         </Vazio>
       </main>
     );
@@ -55,7 +85,7 @@ function Grupo({ titulo, children }) {
 }
 
 function ProdutoDetalhe({ produto }) {
-  const { adicionar } = useCarrinho();
+  const { adicionar } = useCart();
   const { abrir } = usePopup();
   const { tamanhos, cores, personalizacoes, variantes } = produto;
   const temCor = cores.length > 0;
@@ -71,11 +101,12 @@ function ProdutoDetalhe({ produto }) {
 
   useEffect(() => setAviso(null), [tamanhoId, corId, extras, quantidade]);
 
-  const tamanhoDisponivel = (t) =>
+  // Só para riscar a opção: continua clicável, e a combinação escolhida mostra "Esgotado"
+  const tamanhoTemEstoque = (t) =>
     variantes.some(
       (v) => v.tamanhoId === t && v.disponivel && (!corId || v.corId === corId),
     );
-  const corDisponivel = (c) =>
+  const corTemEstoque = (c) =>
     variantes.some(
       (v) =>
         v.corId === c &&
@@ -83,16 +114,13 @@ function ProdutoDetalhe({ produto }) {
         (!tamanhoId || v.tamanhoId === tamanhoId),
     );
 
+  // Produto sem cor: as variantes têm corId null, e o corId escolhido também fica null
   const variante = useMemo(
-    () =>
-      variantes.find(
-        (v) =>
-          v.tamanhoId === tamanhoId &&
-          (v.corId ?? null) === (temCor ? corId : null),
-      ),
-    [variantes, tamanhoId, corId, temCor],
+    () => variantes.find((v) => v.tamanhoId === tamanhoId && v.corId === corId),
+    [variantes, tamanhoId, corId],
   );
 
+  // Tamanho e cor nunca somam: só as personalizações marcadas
   const escolhidas = personalizacoes.filter((p) => extras.includes(p.id));
   const precoUnitario =
     produto.precoBase + escolhidas.reduce((s, p) => s + p.precoAdicional, 0);
@@ -102,6 +130,7 @@ function ProdutoDetalhe({ produto }) {
     : temCor && !corId
       ? "Escolha uma cor"
       : null;
+  const esgotado = !faltaEscolher && !variante?.disponivel;
 
   function alternarExtra(pid) {
     setExtras((atual) =>
@@ -110,9 +139,7 @@ function ProdutoDetalhe({ produto }) {
   }
 
   function handleAdicionar() {
-    if (faltaEscolher) return setAviso(faltaEscolher);
-    if (!variante?.disponivel)
-      return setAviso("Essa combinação está indisponível no momento.");
+    if (faltaEscolher || esgotado) return;
 
     const ok = adicionar({
       varianteId: variante.id,
@@ -129,7 +156,10 @@ function ProdutoDetalhe({ produto }) {
       quantidade,
     });
 
-    if (!ok) return setAviso("Seu carrinho já está no limite de 50 itens.");
+    if (!ok)
+      return setAviso(
+        `Seu carrinho já está no limite de ${MAXIMO_ITENS} itens diferentes.`,
+      );
     setQuantidade(1);
     abrir("cart");
   }
@@ -140,7 +170,7 @@ function ProdutoDetalhe({ produto }) {
       style={{ paddingTop: 36, paddingBottom: 80 }}
     >
       <Head>
-        <title>{produto.nome} · Belíssima Uniformes</title>
+        <title>{`${produto.nome} · Belíssima Uniformes`}</title>
       </Head>
 
       <nav style={{ fontSize: 13, color: S.muted, marginBottom: 24 }}>
@@ -192,7 +222,31 @@ function ProdutoDetalhe({ produto }) {
           )}
 
           {!produto.disponivel ? (
-            <Alert>Produto indisponível no momento.</Alert>
+            <div
+              style={{
+                background: S.white,
+                border: S.line,
+                borderRadius: S.radius.lg,
+                padding: "18px 20px",
+              }}
+            >
+              <p style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>
+                Produto indisponível no momento
+              </p>
+              <p style={{ fontSize: 14, color: S.soft, marginBottom: 14 }}>
+                Fale com a gente no WhatsApp para saber quando volta ou fazer
+                uma encomenda.
+              </p>
+              <Button
+                href={whatsappComTexto(
+                  `Olá! Tenho interesse no produto "${produto.nome}", que está indisponível no site.`,
+                )}
+                {...LINK_EXTERNO}
+              >
+                <Icon name="whatsapp" size={18} color={S.white} />
+                Chamar no WhatsApp
+              </Button>
+            </div>
           ) : (
             <>
               <Grupo titulo="Tamanho">
@@ -202,7 +256,7 @@ function ProdutoDetalhe({ produto }) {
                     type="button"
                     className="bu-chip"
                     aria-pressed={tamanhoId === t.id}
-                    disabled={!tamanhoDisponivel(t.id) && tamanhoId !== t.id}
+                    data-esgotado={!tamanhoTemEstoque(t.id)}
                     onClick={() =>
                       setTamanhoId((atual) => (atual === t.id ? null : t.id))
                     }
@@ -220,7 +274,7 @@ function ProdutoDetalhe({ produto }) {
                       type="button"
                       className="bu-chip"
                       aria-pressed={corId === c.id}
-                      disabled={!corDisponivel(c.id) && corId !== c.id}
+                      data-esgotado={!corTemEstoque(c.id)}
                       onClick={() =>
                         setCorId((atual) => (atual === c.id ? null : c.id))
                       }
@@ -272,11 +326,23 @@ function ProdutoDetalhe({ produto }) {
                 />
               </Grupo>
 
+              {esgotado && (
+                <Alert>
+                  Esgotado nessa combinação. Escolha outro tamanho ou cor.
+                </Alert>
+              )}
               <Alert>{aviso}</Alert>
 
-              <Button full onClick={handleAdicionar} style={{ padding: 14 }}>
-                Adicionar ao carrinho ·{" "}
-                {formatarPreco(precoUnitario * quantidade)}
+              <Button
+                full
+                onClick={handleAdicionar}
+                disabled={!!faltaEscolher || esgotado}
+                style={{ padding: 14 }}
+              >
+                {faltaEscolher ??
+                  (esgotado
+                    ? "Esgotado"
+                    : `Adicionar ao carrinho · ${formatarPreco(precoUnitario * quantidade)}`)}
               </Button>
               <p style={{ fontSize: 12, color: S.muted, marginTop: 10 }}>
                 O pagamento é combinado com a loja depois do pedido.

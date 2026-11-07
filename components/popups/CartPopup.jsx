@@ -2,12 +2,12 @@
 import Popup from "./Popup";
 import Button from "components/ui/Button";
 import ItemCarrinho from "components/carrinho/ItemCarrinho";
-import { useCarrinho } from "context/CarrinhoContext";
+import { useCart } from "context/CartContext";
 import { formatarPreco } from "lib/formatar";
 import { S, T } from "styles/theme";
 
 export default function CartPopup({ onClose }) {
-  const { itens, totalEstimado } = useCarrinho();
+  const { itens, total } = useCart();
 
   return (
     <Popup onClose={onClose} width={380}>
@@ -47,7 +47,7 @@ export default function CartPopup({ onClose }) {
           >
             <span style={T.label}>Total</span>
             <span style={{ fontSize: 18, fontWeight: 600 }}>
-              {formatarPreco(totalEstimado)}
+              {formatarPreco(total)}
             </span>
           </div>
 

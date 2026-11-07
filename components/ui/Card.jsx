@@ -1,10 +1,12 @@
 // components/ui/Card.jsx
 import { S, T } from "styles/theme";
 
-export default function Card({ titulo, children, style }) {
+export default function Card({ titulo, id, children, style }) {
   return (
     <section
+      id={id}
       style={{
+        scrollMarginTop: 150,
         background: S.white,
         border: S.line,
         borderRadius: S.radius.xl,

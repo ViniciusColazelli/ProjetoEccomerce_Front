@@ -110,8 +110,8 @@ export default function UserMenu() {
           <MenuItem onClick={() => ir("/perfil")}>Minha conta</MenuItem>
           <MenuItem onClick={() => ir("/pedidos")}>Meus pedidos</MenuItem>
           {isAdmin && (
-            <MenuItem onClick={() => ir("/admin/pedidos")}>
-              Painel administrativo
+            <MenuItem onClick={() => ir("/admin/produtos")}>
+              Painel admin
             </MenuItem>
           )}
           <MenuItem color={S.danger} onClick={handleLogout}>

@@ -5,18 +5,20 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
 import { obterMeuPedido, cancelarMeuPedido } from "lib/pedidos";
-import { formatarData } from "lib/formatar";
+import { formatarData, formatarPreco } from "lib/formatar";
 import { MENSAGEM_CLIENTE } from "lib/statusPedido";
-import { WHATSAPP_URL, LINK_EXTERNO, ENDERECO, HORARIO } from "lib/contato";
+import { whatsappComTexto, LINK_EXTERNO, ENDERECO, HORARIO } from "lib/contato";
 import { useConsulta } from "hooks/useConsulta";
 import RotaProtegida from "components/layout/RotaProtegida";
 import ItensPedido from "components/pedidos/ItensPedido";
+import AndamentoPedido from "components/pedidos/AndamentoPedido";
 import StatusBadge from "components/ui/StatusBadge";
 import Button from "components/ui/Button";
 import Confirmar from "components/ui/Confirmar";
 import Alert from "components/ui/Alert";
 import Loading from "components/ui/Loading";
 import Vazio from "components/ui/Vazio";
+import Icon from "components/ui/Icon";
 import { S, T } from "styles/theme";
 
 export default function PedidoPage() {
@@ -51,26 +53,55 @@ export default function PedidoPage() {
 }
 
 function DetalhePedido({ id, novo }) {
+  // 404: não existe ou é de outro cliente (a API não diferencia) → "não encontrado"
   const {
     dados: pedido,
     carregando,
     erro,
     recarregar,
-  } = useConsulta(() => obterMeuPedido(id), [id]);
+    setDados,
+  } = useConsulta(
+    () =>
+      obterMeuPedido(id).catch((e) => {
+        if (e.status === 404) return null;
+        throw e;
+      }),
+    [id],
+  );
   const [confirmando, setConfirmando] = useState(false);
 
   if (carregando && !pedido) return <Loading />;
-  if (erro || !pedido)
+
+  if (erro)
     return (
-      <Vazio acao={<Button href="/pedidos">Voltar aos pedidos</Button>}>
-        {erro ?? "Pedido não encontrado."}
+      <Vazio
+        acao={
+          <Button variant="outline" onClick={recarregar}>
+            Tentar de novo
+          </Button>
+        }
+      >
+        Não foi possível carregar o pedido: {erro}
+      </Vazio>
+    );
+
+  if (!pedido)
+    return (
+      <Vazio acao={<Button href="/pedidos">Ver meus pedidos</Button>}>
+        Pedido não encontrado.
       </Vazio>
     );
 
   const aguardando = pedido.status === "AguardandoPagamento";
+  const linkPagamento = whatsappComTexto(
+    `Olá! Fiz o pedido #${pedido.id} no site, no valor de ${formatarPreco(pedido.total)}. Como faço o pagamento?`,
+  );
 
   return (
     <>
+      <Head>
+        <title>{`Pedido #${pedido.id} · Belíssima Uniformes`}</title>
+      </Head>
       {novo && aguardando && (
         <Alert type="success">Pedido #{pedido.id} criado com sucesso!</Alert>
       )}
@@ -107,15 +138,38 @@ function DetalhePedido({ id, novo }) {
           marginBottom: 24,
         }}
       >
+        <AndamentoPedido pedido={pedido} />
+
+        {aguardando && (
+          <p style={{ fontSize: 16, fontWeight: 600, marginBottom: 6 }}>
+            Combine o pagamento pelo WhatsApp
+          </p>
+        )}
         <p style={{ fontSize: 15, lineHeight: 1.6 }}>
           {MENSAGEM_CLIENTE[pedido.status]}
         </p>
         {pedido.status === "ProntoParaRetirada" && (
-          <p style={{ fontSize: 14, color: S.soft, marginTop: 8 }}>
-            {ENDERECO}
-            <br />
-            {HORARIO}
-          </p>
+          <div
+            style={{
+              display: "grid",
+              gap: 8,
+              marginTop: 14,
+              padding: "14px 16px",
+              background: S.pageBg,
+              borderRadius: S.radius.md,
+              fontSize: 14,
+              color: S.soft,
+            }}
+          >
+            <p style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <Icon name="mapPin" size={17} color={S.primary} />
+              {ENDERECO}
+            </p>
+            <p style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <Icon name="clock" size={17} color={S.primary} />
+              {HORARIO}
+            </p>
+          </div>
         )}
         {aguardando && (
           <div
@@ -126,8 +180,9 @@ function DetalhePedido({ id, novo }) {
               marginTop: 16,
             }}
           >
-            <Button href={WHATSAPP_URL} {...LINK_EXTERNO}>
-              Combinar pagamento no WhatsApp
+            <Button href={linkPagamento} {...LINK_EXTERNO}>
+              <Icon name="whatsapp" size={18} color={S.white} />
+              Chamar no WhatsApp
             </Button>
             <Button variant="danger" onClick={() => setConfirmando(true)}>
               Cancelar pedido
@@ -152,8 +207,8 @@ function DetalhePedido({ id, novo }) {
           titulo="Cancelar pedido?"
           textoConfirmar="Sim, cancelar"
           onConfirmar={async () => {
-            await cancelarMeuPedido(id);
-            recarregar();
+            // A API devolve o pedido já cancelado: não precisa buscar de novo
+            setDados(await cancelarMeuPedido(id));
           }}
           onClose={() => setConfirmando(false)}
         >

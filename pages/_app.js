@@ -2,14 +2,14 @@
 import Head from "next/head";
 import { AuthProvider } from "context/AuthContext";
 import { PopupProvider } from "context/PopupContext";
-import { CarrinhoProvider } from "context/CarrinhoContext";
+import { CartProvider } from "context/CartContext";
 import Layout from "components/layout/Layout";
 import "styles/globals.css";
 
 export default function App({ Component, pageProps }) {
   return (
     <AuthProvider>
-      <CarrinhoProvider>
+      <CartProvider>
         <PopupProvider>
           <Head>
             <title>Belíssima Uniformes</title>
@@ -22,7 +22,7 @@ export default function App({ Component, pageProps }) {
             <Component {...pageProps} />
           </Layout>
         </PopupProvider>
-      </CarrinhoProvider>
+      </CartProvider>
     </AuthProvider>
   );
 }

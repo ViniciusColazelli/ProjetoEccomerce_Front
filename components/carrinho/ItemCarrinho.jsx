@@ -4,12 +4,12 @@
 import Link from "next/link";
 import { S } from "styles/theme";
 import { formatarPreco, descreverVariante } from "lib/formatar";
-import { useCarrinho, MAXIMO_QUANTIDADE } from "context/CarrinhoContext";
+import { useCart, MAXIMO_QUANTIDADE } from "context/CartContext";
 import Quantidade from "components/ui/Quantidade";
 import Icon from "components/ui/Icon";
 
 export default function ItemCarrinho({ item, compacto, disabled }) {
-  const { alterarQuantidade, remover } = useCarrinho();
+  const { alterarQuantidade, remover } = useCart();
 
   return (
     <div

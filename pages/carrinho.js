@@ -6,7 +6,7 @@ import Head from "next/head";
 import { criarPedido } from "lib/pedidos";
 import { formatarPreco } from "lib/formatar";
 import { useAsyncAction } from "hooks/useAsyncAction";
-import { useCarrinho } from "context/CarrinhoContext";
+import { useCart } from "context/CartContext";
 import { useAuthContext } from "context/AuthContext";
 import { usePopup } from "context/PopupContext";
 import ItemCarrinho from "components/carrinho/ItemCarrinho";
@@ -23,7 +23,7 @@ const MAXIMO_OBSERVACAO = 500;
 
 export default function Carrinho() {
   const router = useRouter();
-  const { itens, carregado, totalPecas, totalEstimado, limpar } = useCarrinho();
+  const { itens, carregado, quantidadeItens, total, limpar } = useCart();
   const { usuario } = useAuthContext();
   const { abrir } = usePopup();
   const [observacao, setObservacao] = useState("");
@@ -40,12 +40,23 @@ export default function Carrinho() {
     });
   });
 
+  // O loading desabilita o botão, mas um duplo clique cai antes do re-render: a ref barra
+  const enviando = useRef(false);
+
   async function handleFinalizar() {
-    if (await enviar.run()) {
+    // Sem login, o próprio "Finalizar" abre o login; o carrinho continua aqui
+    if (!usuario) return abrir("auth");
+    if (enviando.current) return;
+
+    enviando.current = true;
+    // 400 (peça saiu da vitrine) e 409 (sem estoque) viram o Alert e o carrinho fica como está
+    const ok = await enviar.run();
+    if (ok) {
       // Vai para o pedido antes de esvaziar, para não piscar o "carrinho vazio"
       await router.push(`/pedidos/${criado.current.id}?novo=1`);
       limpar();
     }
+    enviando.current = false;
   }
 
   if (!carregado) return <Loading />;
@@ -99,7 +110,7 @@ export default function Carrinho() {
               }}
             >
               <span>Peças</span>
-              <span>{totalPecas}</span>
+              <span>{quantidadeItens}</span>
             </div>
             <div
               style={{
@@ -114,7 +125,7 @@ export default function Carrinho() {
             >
               <span style={T.label}>Total</span>
               <span style={{ fontSize: 22, fontWeight: 600 }}>
-                {formatarPreco(totalEstimado)}
+                {formatarPreco(total)}
               </span>
             </div>
 
@@ -141,23 +152,25 @@ export default function Carrinho() {
 
             <Alert>{enviar.erro}</Alert>
 
-            {usuario ? (
-              <Button
-                full
-                loading={enviar.loading}
-                onClick={handleFinalizar}
-                style={{ padding: 13 }}
+            <Button
+              full
+              loading={enviar.loading}
+              onClick={handleFinalizar}
+              style={{ padding: 13 }}
+            >
+              {enviar.loading ? "Enviando pedido..." : "Finalizar pedido"}
+            </Button>
+            {!usuario && (
+              <p
+                style={{
+                  fontSize: 12,
+                  color: S.soft,
+                  marginTop: 8,
+                  textAlign: "center",
+                }}
               >
-                {enviar.loading ? "Enviando pedido..." : "Finalizar pedido"}
-              </Button>
-            ) : (
-              <Button
-                full
-                onClick={() => abrir("auth")}
-                style={{ padding: 13 }}
-              >
-                Entrar para finalizar
-              </Button>
+                Você vai entrar na sua conta antes de enviar.
+              </p>
             )}
 
             <p

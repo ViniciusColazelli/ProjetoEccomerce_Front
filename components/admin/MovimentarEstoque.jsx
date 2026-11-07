@@ -1,7 +1,8 @@
 // components/admin/MovimentarEstoque.jsx
 // Modal de entrada, saída ou ajuste (inventário) de uma variante.
 // Ajuste recebe o saldo contado; a API grava a diferença como Entrada ou Saida.
-import { useState } from "react";
+// `onFeito(variante)` recebe a variante atualizada que a API devolve.
+import { useRef, useState } from "react";
 import { entradaEstoque, saidaEstoque, ajustarEstoque } from "lib/estoqueAdmin";
 import { descreverVariante } from "lib/formatar";
 import { useAsyncAction } from "hooks/useAsyncAction";
@@ -44,18 +45,19 @@ export default function MovimentarEstoque({
     tipo === "ajuste" ? String(variante.quantidade) : "",
   );
   const [motivo, setMotivo] = useState("");
-  const { run, loading, erro } = useAsyncAction(() =>
-    config.enviar(
+  const atualizada = useRef(null); // a API devolve a variante com o saldo novo
+  const { run, loading, erro } = useAsyncAction(async () => {
+    atualizada.current = await config.enviar(
       variante.varianteId,
       parseInt(quantidade, 10) || 0,
       motivo.trim(),
-    ),
-  );
+    );
+  });
 
   async function handleSubmit(e) {
     e.preventDefault();
     if (await run()) {
-      onFeito();
+      onFeito(atualizada.current);
       onClose();
     }
   }
@@ -85,7 +87,6 @@ export default function MovimentarEstoque({
           type="number"
           inputMode="numeric"
           min={tipo === "ajuste" ? 0 : 1}
-          max={tipo === "saida" ? variante.quantidade : undefined}
           step="1"
           required
           autoFocus

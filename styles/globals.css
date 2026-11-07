@@ -171,6 +171,40 @@ textarea:focus {
 .bu-table tbody tr:hover {
   background: #fafafa;
 }
+/* Grade de variantes tamanho × cor */
+.bu-table .bu-centro {
+  text-align: center;
+}
+.bu-grade tbody th {
+  text-align: left;
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
+  border-bottom: 0.5px solid #f0f0f0;
+  padding: 12px 16px;
+}
+.bu-grade td {
+  border-left: 0.5px solid #f0f0f0;
+}
+.bu-grade-vazia {
+  font-size: 12px;
+  font-style: italic;
+  color: #bbb;
+}
+.bu-grade-inativo {
+  font-weight: 400;
+  color: #999;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Linha que abre um detalhe ao clicar */
+.bu-table tbody tr.bu-tr-link {
+  cursor: pointer;
+}
+.bu-table tbody tr.bu-tr-link:hover td:first-child a {
+  color: #a52021;
+}
 .bu-table .bu-num {
   text-align: right;
   white-space: nowrap;
@@ -186,6 +220,10 @@ textarea:focus {
 .bu-btn:hover:not(:disabled) {
   filter: brightness(0.92);
   transform: translateY(-1px);
+}
+.bu-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .bu-nav-link {
@@ -255,6 +293,22 @@ textarea:focus {
   text-decoration-color: #a52021;
 }
 
+/* Linha de resultado do popup de busca */
+.bu-busca-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 9px 8px;
+  margin: 0 -8px;
+  border-radius: 8px;
+  transition: background 0.12s;
+}
+.bu-busca-item:hover,
+.bu-busca-item:focus-visible {
+  background: #f5f5f5;
+}
+
 .bu-icon-btn {
   border: none;
   background: none;
@@ -309,6 +363,11 @@ textarea:focus {
   text-decoration: line-through;
   cursor: not-allowed;
 }
+/* Sem estoque na combinação: continua clicável (a página mostra "Esgotado") */
+.bu-chip[data-esgotado="true"]:not([aria-pressed="true"]) {
+  color: #bbb;
+  text-decoration: line-through;
+}
 
 .bu-tab {
   padding: 10px 2px;
@@ -359,6 +418,7 @@ textarea:focus {
   .bu-cat-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  /* Features empilha junto com o hero */
   .bu-strip {
     grid-template-columns: 1fr;
   }
@@ -369,17 +429,6 @@ textarea:focus {
   }
   .bu-strip-item + .bu-strip-item {
     border-top: 0.5px solid #e2e2e2;
-  }
-  .bu-strip {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .bu-strip-item {
-    padding: 32px 32px 32px 0;
-  }
-  .bu-strip-item + .bu-strip-item {
-    border-left: 0.5px solid #e2e2e2;
-    padding-left: 32px;
   }
 
   .bu-footer-grid {
@@ -421,17 +470,6 @@ textarea:focus {
   }
   .bu-section-title {
     font-size: 28px !important;
-  }
-  .bu-strip {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .bu-strip-item {
-    padding: 32px 32px 32px 0;
-  }
-  .bu-strip-item + .bu-strip-item {
-    border-left: 0.5px solid #e2e2e2;
-    padding-left: 32px;
   }
 
   .bu-footer-grid {
