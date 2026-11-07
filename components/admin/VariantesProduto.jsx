@@ -203,7 +203,7 @@ export default function VariantesProduto({ produto, onMudou }) {
       )}
       <p style={{ fontSize: 12, color: S.muted, marginTop: 10 }}>
         <Link
-          href={`/admin/estoque?produtoId=${produto.id}`}
+          href={`/admin/estoque/movimentacoes?produtoId=${produto.id}`}
           className="bu-text-link"
           style={{ fontSize: 12 }}
         >
