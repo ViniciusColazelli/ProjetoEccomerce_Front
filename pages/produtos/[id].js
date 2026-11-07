@@ -7,7 +7,7 @@ import Link from "next/link";
 import { obterProduto } from "lib/produtos";
 import { formatarPreco } from "lib/formatar";
 import { useConsulta } from "hooks/useConsulta";
-import { useCarrinho, MAXIMO_QUANTIDADE } from "context/CarrinhoContext";
+import { useCart, MAXIMO_ITENS, MAXIMO_QUANTIDADE } from "context/CartContext";
 import { usePopup } from "context/PopupContext";
 import Button from "components/ui/Button";
 import Quantidade from "components/ui/Quantidade";
@@ -55,7 +55,7 @@ function Grupo({ titulo, children }) {
 }
 
 function ProdutoDetalhe({ produto }) {
-  const { adicionar } = useCarrinho();
+  const { adicionar } = useCart();
   const { abrir } = usePopup();
   const { tamanhos, cores, personalizacoes, variantes } = produto;
   const temCor = cores.length > 0;
@@ -129,7 +129,10 @@ function ProdutoDetalhe({ produto }) {
       quantidade,
     });
 
-    if (!ok) return setAviso("Seu carrinho já está no limite de 50 itens.");
+    if (!ok)
+      return setAviso(
+        `Seu carrinho já está no limite de ${MAXIMO_ITENS} itens diferentes.`,
+      );
     setQuantidade(1);
     abrir("cart");
   }

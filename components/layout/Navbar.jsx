@@ -9,7 +9,7 @@ import UserMenu from "./UserMenu";
 import { S } from "styles/theme";
 import { useAuthContext } from "context/AuthContext";
 import { usePopup } from "context/PopupContext";
-import { useCarrinho } from "context/CarrinhoContext";
+import { useCart } from "context/CartContext";
 import { LINKS } from "lib/navegacao";
 
 const linkTopo = { display: "flex", alignItems: "center", gap: 6 };
@@ -52,7 +52,7 @@ function TopBar() {
 export default function Navbar() {
   const { usuario } = useAuthContext();
   const { toggle } = usePopup();
-  const { totalPecas } = useCarrinho();
+  const { quantidadeItens } = useCart();
 
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 100 }}>
@@ -113,7 +113,7 @@ export default function Navbar() {
 
             <NavBtn
               onClick={() => toggle("cart")}
-              badge={totalPecas}
+              badge={quantidadeItens}
               label="Carrinho"
             >
               <Icon name="bag" />
