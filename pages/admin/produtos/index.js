@@ -198,28 +198,48 @@ function ListaProdutos() {
                 {dados.produtos.map((p) => (
                   <tr key={p.id}>
                     <td>
-                      <Link
-                        href={`/admin/produtos/${p.id}`}
-                        style={{ fontWeight: 500 }}
-                        className="bu-link-muted"
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                        }}
                       >
-                        {p.nome}
-                      </Link>
-                      {p.descricao && (
-                        <p
-                          style={{
-                            fontSize: 12,
-                            color: S.muted,
-                            marginTop: 2,
-                            maxWidth: 420,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {p.descricao}
-                        </p>
-                      )}
+                        {p.imagemUrl ? (
+                          <img
+                            src={p.imagemUrl}
+                            alt=""
+                            loading="lazy"
+                            className="bu-mini-produto"
+                          />
+                        ) : (
+                          <span className="bu-mini-produto" title="Sem foto" />
+                        )}
+                        <div style={{ minWidth: 0 }}>
+                          <Link
+                            href={`/admin/produtos/${p.id}`}
+                            style={{ fontWeight: 500 }}
+                            className="bu-link-muted"
+                          >
+                            {p.nome}
+                          </Link>
+                          {p.descricao && (
+                            <p
+                              style={{
+                                fontSize: 12,
+                                color: S.muted,
+                                marginTop: 2,
+                                maxWidth: 420,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {p.descricao}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="bu-num">{formatarPreco(p.precoBase)}</td>
                     <td>

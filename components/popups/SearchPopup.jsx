@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import Popup from "./Popup";
 import Input from "components/ui/Input";
 import Button from "components/ui/Button";
+import FotoProduto from "components/ui/FotoProduto";
 import { listarProdutos } from "lib/produtos";
 import { formatarPreco } from "lib/formatar";
 import { useDebounce } from "hooks/useDebounce";
@@ -128,7 +129,15 @@ export default function SearchPopup({ onClose }) {
                 onClick={onClose}
                 className="bu-busca-item"
               >
-                <span style={{ fontSize: 14, color: S.dark }}>{p.nome}</span>
+                <FotoProduto
+                  src={p.imagemUrl}
+                  raio={6}
+                  larguraLogo="75%"
+                  style={{ width: 36, flexShrink: 0 }}
+                />
+                <span style={{ fontSize: 14, color: S.dark, flex: 1 }}>
+                  {p.nome}
+                </span>
                 <span style={{ fontSize: 13, color: S.soft, flexShrink: 0 }}>
                   {formatarPreco(p.precoBase)}
                 </span>

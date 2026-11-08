@@ -210,6 +210,46 @@ textarea:focus {
   white-space: nowrap;
 }
 
+/* Miniatura do produto nas listas do painel (ou o quadrado vazio quando não tem foto) */
+.bu-mini-produto {
+  width: 40px;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #f2f2f2;
+  display: block;
+}
+
+/* ── Fotos do produto (painel) ──────────────────────────── */
+.bu-fotos-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+}
+.bu-foto {
+  border: 0.5px solid #e2e2e2;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+.bu-foto-img {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  display: block;
+  background: #f2f2f2;
+}
+.bu-foto-acoes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+}
+
 /* ── Interações ─────────────────────────────────────────── */
 .bu-btn {
   transition:
@@ -297,9 +337,9 @@ textarea:focus {
 .bu-busca-item {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
-  padding: 9px 8px;
+  padding: 6px 8px;
   margin: 0 -8px;
   border-radius: 8px;
   transition: background 0.12s;
@@ -334,6 +374,33 @@ textarea:focus {
 .bu-produto-card:hover .bu-produto-img {
   transform: translateY(-3px);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Miniaturas da galeria na página do produto */
+.bu-galeria-miniaturas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+.bu-galeria-miniatura {
+  width: 72px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  opacity: 0.7;
+  transition:
+    opacity 0.15s,
+    border-color 0.15s;
+}
+.bu-galeria-miniatura:hover {
+  opacity: 1;
+}
+.bu-galeria-miniatura[aria-pressed="true"] {
+  border-color: #a52021;
+  opacity: 1;
 }
 
 /* Botão de opção (tamanho, cor, filtro) */

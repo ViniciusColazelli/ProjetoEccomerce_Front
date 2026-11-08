@@ -7,6 +7,7 @@ import { formatarPreco, descreverVariante } from "lib/formatar";
 import { useCart, MAXIMO_QUANTIDADE } from "context/CartContext";
 import Quantidade from "components/ui/Quantidade";
 import Icon from "components/ui/Icon";
+import FotoProduto from "components/ui/FotoProduto";
 
 export default function ItemCarrinho({ item, compacto, disabled }) {
   const { alterarQuantidade, remover } = useCart();
@@ -20,6 +21,20 @@ export default function ItemCarrinho({ item, compacto, disabled }) {
         borderBottom: S.line,
       }}
     >
+      {/* itens salvos antes das fotos não têm imagemUrl: aparece o logo */}
+      <Link
+        href={`/produtos/${item.produtoId}`}
+        tabIndex={-1}
+        aria-hidden="true"
+        style={{ flexShrink: 0 }}
+      >
+        <FotoProduto
+          src={item.imagemUrl}
+          raio={S.radius.sm}
+          larguraLogo="70%"
+          style={{ width: compacto ? 48 : 72 }}
+        />
+      </Link>
       <div style={{ flex: 1, minWidth: 0 }}>
         <Link
           href={`/produtos/${item.produtoId}`}

@@ -15,8 +15,8 @@ import Quantidade from "components/ui/Quantidade";
 import Alert from "components/ui/Alert";
 import Loading from "components/ui/Loading";
 import Vazio from "components/ui/Vazio";
-import Logo from "components/ui/Logo";
 import Icon from "components/ui/Icon";
+import GaleriaProduto from "components/produto/GaleriaProduto";
 import { S, T } from "styles/theme";
 
 export default function ProdutoPage() {
@@ -155,6 +155,8 @@ function ProdutoDetalhe({ produto }) {
       })),
       precoUnitario,
       quantidade,
+      // miniatura da capa, para o carrinho (null: produto sem foto)
+      imagemUrl: produto.imagens?.[0]?.urlMiniatura ?? null,
     });
 
     if (!ok)
@@ -183,20 +185,7 @@ function ProdutoDetalhe({ produto }) {
       </nav>
 
       <div className="bu-detalhe-grid">
-        <div
-          style={{
-            aspectRatio: "4 / 5",
-            background: S.imageBg,
-            borderRadius: S.radius.xl,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <div style={{ opacity: 0.35, width: "50%" }}>
-            <Logo height="auto" />
-          </div>
-        </div>
+        <GaleriaProduto nome={produto.nome} imagens={produto.imagens} />
 
         <div>
           <h1
