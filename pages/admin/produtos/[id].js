@@ -1,5 +1,5 @@
 // pages/admin/produtos/[id].js
-// Edição do produto: dados, opções (tamanho/cor/personalização) e variantes
+// Edição do produto: dados, fotos, opções (tamanho/cor/personalização) e variantes
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
@@ -12,6 +12,7 @@ import { useConsulta } from "hooks/useConsulta";
 import { useAsyncAction } from "hooks/useAsyncAction";
 import AdminLayout from "components/admin/AdminLayout";
 import ProdutoForm from "components/admin/ProdutoForm";
+import FotosProduto from "components/admin/FotosProduto";
 import OpcoesProduto from "components/admin/OpcoesProduto";
 import VariantesProduto from "components/admin/VariantesProduto";
 import PassoAPasso from "components/admin/PassoAPasso";
@@ -138,6 +139,7 @@ function EditarProduto({ id }) {
         />
       </Card>
 
+      <FotosProduto produto={produto} onMudou={recarregar} />
       <OpcoesProduto produto={produto} onMudou={recarregar} />
       <VariantesProduto produto={produto} onMudou={recarregar} />
     </div>
