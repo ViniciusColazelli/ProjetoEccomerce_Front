@@ -2,10 +2,13 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { loginCliente, logoutCliente, getPerfilCliente } from "lib/api";
+import { marcarSessao, desmarcarSessao } from "lib/sessao";
 
 const AuthContext = createContext(null);
 
-// Checagem que não pode disparar "sessão expirada": visitante anônimo recebe 401
+// Checagem que não pode disparar "sessão expirada": visitante anônimo recebe 401.
+// Com a marca de sessão (lib/sessao.js), um JWT vencido ainda é renovado pelo lib/api.js:
+// quem volta dias depois continua logado
 const CHECAGEM_SILENCIOSA = { ignorarSessaoExpirada: true };
 
 // Só o que a Navbar e o perfil usam do ResponseClienteProfile
@@ -26,6 +29,7 @@ export function AuthProvider({ children }) {
 
     getPerfilCliente(CHECAGEM_SILENCIOSA)
       .then((perfil) => {
+        marcarSessao(); // ex.: logado antes de existir a marca
         if (!cancelado) setUsuario(dadosDoUsuario(perfil));
       })
       .catch(() => {
@@ -40,9 +44,10 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // Reage quando lib/api.js detecta 401 numa rota autenticada
+  // Reage quando lib/api.js recebe 401 numa rota autenticada mesmo depois de tentar renovar a sessão
   useEffect(() => {
     function aoExpirar() {
+      desmarcarSessao();
       setUsuario(null);
       router.push("/");
     }
@@ -56,6 +61,7 @@ export function AuthProvider({ children }) {
   async function login(credenciais) {
     await loginCliente(credenciais);
     const perfil = await getPerfilCliente(CHECAGEM_SILENCIOSA);
+    marcarSessao();
     setUsuario(dadosDoUsuario(perfil));
   }
 
@@ -66,10 +72,11 @@ export function AuthProvider({ children }) {
 
   async function logout() {
     try {
-      await logoutCliente(); // a API apaga o cookie
+      await logoutCliente(); // a API revoga a sessão e apaga os cookies
     } catch {
       // mesmo se falhar, encerra a sessão local
     }
+    desmarcarSessao();
     setUsuario(null);
   }
 
